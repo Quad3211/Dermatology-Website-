@@ -1,12 +1,6 @@
-/**
- * useAnalysisRealtime — Supabase Realtime subscription + React Query fallback.
- *
- * Preferred delivery path: WebSocket push via postgres_changes.
- * Fallback: React Query polling every 3s (existing useAnalysis hook behaviour).
- * The fallback activates automatically when WebSocket is unavailable.
- */
-import { useEffect, useRef } from "react";
+// realtime sub + react-query polling fallback for analysis results
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { supabase } from "../config/supabase";
 import { api, type AnalysisResponse } from "../services/api";
 
@@ -24,7 +18,7 @@ export function useAnalysisRealtime({
   const queryClient = useQueryClient();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // ── React Query (fallback polling) ────────────────────────────
+  // polling fallback
   const query = useQuery<AnalysisResponse>({
     queryKey: ["analysis", analysisId],
     queryFn: () => api.analysis.getById(analysisId!),
@@ -39,7 +33,7 @@ export function useAnalysisRealtime({
     staleTime: 0,
   });
 
-  // ── Supabase Realtime subscription ────────────────────────────
+  // realtime push
   useEffect(() => {
     if (!analysisId) return;
 
@@ -69,7 +63,7 @@ export function useAnalysisRealtime({
     };
   }, [analysisId, queryClient]);
 
-  // ── Side effects on completion ────────────────────────────────
+  // fire callbacks on complete
   useEffect(() => {
     const data = query.data;
     if (!data) return;

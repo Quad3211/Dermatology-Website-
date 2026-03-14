@@ -1,23 +1,23 @@
-import { Link } from "react-router-dom";
-import { Button } from "../../components/core/Button";
+import type { Variants } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  ShieldPlus,
   Activity,
-  Clock,
-  Shield,
   AlertTriangle,
-  Stethoscope,
-  Lock,
   ArrowRight,
   CheckCircle2,
-  Search,
+  Clock,
   Heart,
+  Lock,
+  Search,
+  Shield,
+  ShieldPlus,
+  Stethoscope,
 } from "lucide-react";
-import { motion } from "framer-motion";
-import type { Variants } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
 import { PublicNavbar } from "../../components/shared/PublicNavbar";
 
-// Animation Variants
+// frame animations
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
@@ -36,19 +36,19 @@ const staggerContainer: Variants = {
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-primary-100 selection:text-primary-900 overflow-x-hidden">
-      {/* Navbar directly integrated */}
+      {/* top nav */}
       <PublicNavbar />
 
-      {/* Hero Section */}
+      {/* page hero */}
       <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden bg-slate-50 min-h-[90vh] flex items-center shadow-inner">
-        {/* Background Image with Gradient Overlay */}
+        {/* hero backdrop */}
         <div className="absolute inset-0 z-0 bg-slate-100">
           <img
             src="https://images.unsplash.com/photo-1576091160550-2173ff9e5ee5?ixlib=rb-4.0.3&auto=format&fit=crop&w=2500&q=80"
             alt="Modern Health Tech"
             className="w-full h-full object-cover origin-center opacity-30 scale-105"
           />
-          {/* Gradient overlay to make text pop */}
+          {/* contrast gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/95 to-transparent mix-blend-multiply" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-50" />
         </div>
@@ -60,7 +60,7 @@ export function LandingPage() {
             variants={staggerContainer}
             className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center"
           >
-            {/* Hero Copy */}
+            {/* hero text */}
             <div className="max-w-2xl px-2">
               <motion.div
                 variants={fadeInUp}
@@ -131,7 +131,7 @@ export function LandingPage() {
               </motion.div>
             </div>
 
-            {/* Empty space on the right so the image shows through clearly on large screens */}
+            {/* desktop visual gap */}
             <div className="hidden lg:block relative h-full">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, rotate: 2 }}
@@ -180,7 +180,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Problem Section */}
+      {/* problem statement section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -250,7 +250,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 4. Solution & Features Section */}
+      {/* solution benefits */}
       <section className="py-24 overflow-hidden bg-slate-50 border-y border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -344,12 +344,12 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 5. How It Works Section */}
+      {/* process steps */}
       <section
         id="how-it-works"
         className="py-24 bg-slate-950 text-white relative overflow-hidden"
       >
-        {/* Subtle Background Glows */}
+        {/* glow effects */}
         <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary-900/30 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-emerald-900/20 rounded-full blur-[120px] pointer-events-none" />
 
@@ -442,7 +442,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 6. How the Doctor Review Works */}
+      {/* human review explanation */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -517,7 +517,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 9. CTA Section */}
+      {/* final call to action */}
       <section className="py-24 bg-gradient-to-br from-primary-700 to-primary-900 relative overflow-hidden text-center shadow-inner">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNHYtbDItMiAyaDZWMTJoLTZsLTIgMi0yLTJINHYxaDF2MmgtMXYxSDB2MmgyLjlsMiAySDF2Mmg0LjVsLTIgMkgwdjJoOGw2LTV2LTJsLTItMnYtMmwtMi0ydjJIMXYtMmgtMXYyaDBWMTRoMTB2MTJoNHYtaDR2LTEwaDR2Mmgwdi0xTDE0IDI0aDJ2MmgtMnYtMnpNNiAyMmg3djJINnptMTAtMnYxaDh2LTFoLTh6TTggMTJoLTFoNHYyaC00djFoNnYtMmgtMXYxSDN2LTFoNXptOC0xMGgydjJoLTJ6bS00IDJoLTJ2MmgyVjA0eiIvPjwvZz48L3N2Zz4=')] opacity-10" />
 
@@ -561,7 +561,7 @@ export function LandingPage() {
         </motion.div>
       </section>
 
-      {/* 10. Footer */}
+      {/* site footer */}
       <footer className="bg-slate-900 text-slate-400 py-16 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">

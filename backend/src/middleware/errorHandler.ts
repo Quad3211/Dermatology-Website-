@@ -1,14 +1,10 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 
 interface AppError extends Error {
   status?: number;
   code?: string;
 }
 
-/**
- * Central error handler — must be the last middleware registered.
- * Catches all errors thrown by route handlers.
- */
 export function errorHandler(
   err: AppError,
   req: Request,
@@ -23,7 +19,7 @@ export function errorHandler(
     err.message,
   );
 
-  // Don't leak stack traces in production
+  // hide stacks in prod
   const isDev = process.env.NODE_ENV !== "production";
 
   res.status(status).json({
@@ -36,7 +32,6 @@ export function errorHandler(
   });
 }
 
-/** Helper — throw typed HTTP errors from route handlers */
 export class HttpError extends Error {
   status: number;
   code: string;

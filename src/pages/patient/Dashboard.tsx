@@ -1,32 +1,32 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle,
+  Clock,
+  FileSearch,
+  Loader2,
+  MessageSquare,
+  ShieldCheck,
+  UploadCloud,
+  Video,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/core/Card";
-import { Button } from "../../components/core/Button";
-import {
-  UploadCloud,
-  FileSearch,
-  ShieldCheck,
-  Loader2,
-  Calendar,
-  MessageSquare,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Video,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { SecureTextChat } from "../../components/shared/SecureTextChat";
 import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
-import { SecureTextChat } from "../../components/shared/SecureTextChat";
 
-// ── Types ──────────────────────────────────────────────────────
+// dashboard user data
 interface DashboardUpload {
-  id: string; // upload ID
+  id: string; // upload ref
   created_at: string;
   status: string;
   body_part: string | null;
@@ -88,7 +88,7 @@ export function Dashboard() {
     },
   });
 
-  // Find exact consultation object for chat/call
+  // match active consultation
   const getConsultation = (id: string) => {
     for (const u of uploads) {
       const c = u.consultations?.find((c) => c.id === id);
@@ -100,7 +100,7 @@ export function Dashboard() {
   const callConsult = callConsultId ? getConsultation(callConsultId) : null;
   const chatConsult = chatConsultId ? getConsultation(chatConsultId) : null;
 
-  // ── Call View Active ──────────────────────────────────────────
+  // active call screen
   if (callConsult) {
     const doctorName = callConsult.doctor?.full_name
       ? `Dr. ${callConsult.doctor.full_name.replace(/^Dr\.\s*/i, "")}`
@@ -129,7 +129,7 @@ export function Dashboard() {
     );
   }
 
-  // ── Chat View Active ──────────────────────────────────────────
+  // active message thread
   if (chatConsult) {
     const doctorName = chatConsult.doctor?.full_name
       ? `Dr. ${chatConsult.doctor.full_name.replace("Dr. ", "")}`
@@ -274,7 +274,7 @@ export function Dashboard() {
                   className="overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col md:flex-row md:items-center p-0">
-                    {/* Status accent border */}
+                    {/* dynamic risk edge */}
                     <div
                       className={cn(
                         "h-1.5 md:h-auto md:w-1.5 shrink-0",

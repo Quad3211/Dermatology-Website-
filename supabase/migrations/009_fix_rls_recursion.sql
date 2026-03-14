@@ -2,9 +2,7 @@
 -- Migration 009: Fix RLS Infinite Recursion
 -- ============================================================
 
--- Rewrite current_user_role to use plpgsql and reset search_path
--- This prevents the security definer function from being macro-inlined
--- and from triggering RLS on public.profiles recursively for the same user.
+-- rewrite into plpgsql to stop RLS recursion loop
 CREATE OR REPLACE FUNCTION public.current_user_role()
 RETURNS public.user_role LANGUAGE plpgsql STABLE SECURITY DEFINER SET search_path = '' AS $$
 DECLARE

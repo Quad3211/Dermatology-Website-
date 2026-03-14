@@ -1,16 +1,16 @@
-import { useState, useMemo } from "react";
-import { Card, CardContent } from "../../components/core/Card";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-  BookOpen,
-  Info,
-  Search,
-  ChevronDown,
   Activity,
   AlertCircle,
-  Sun,
+  BookOpen,
+  ChevronDown,
+  Info,
+  Search,
   ShieldCheck,
+  Sun,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
+import { Card, CardContent } from "../../components/core/Card";
 
 const categories = [
   "All",
@@ -114,7 +114,7 @@ export function EducationView() {
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto pb-12">
-      {/* Header */}
+      {/* page header */}
       <div>
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
           Patient Education Center
@@ -125,9 +125,9 @@ export function EducationView() {
         </p>
       </div>
 
-      {/* Interactive Controls */}
+      {/* filter controls */}
       <div className="space-y-4">
-        {/* Search Bar */}
+        {/* search input */}
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
           <input
@@ -139,7 +139,7 @@ export function EducationView() {
           />
         </div>
 
-        {/* Categories */}
+        {/* category pills */}
         <div className="flex flex-wrap gap-2">
           {categories.map((cat) => (
             <button
@@ -157,7 +157,7 @@ export function EducationView() {
         </div>
       </div>
 
-      {/* Resources List */}
+      {/* content items */}
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
           {filteredResources.map((resource) => {
@@ -274,7 +274,7 @@ export function EducationView() {
         )}
       </div>
 
-      {/* Info Card */}
+      {/* bottom notification */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

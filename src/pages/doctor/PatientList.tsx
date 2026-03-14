@@ -1,26 +1,26 @@
-import { useState } from "react";
-import {
-  Users,
-  Search,
-  ChevronRight,
-  AlertTriangle,
-  CheckCircle,
-  Calendar,
-  Loader2,
-  Clock,
-  Video,
-  MessageSquare,
-} from "lucide-react";
-import { Card, CardContent } from "../../components/core/Card";
-import { Button } from "../../components/core/Button";
-import { cn } from "../../utils/cn";
-import { supabase } from "../../config/supabase";
 import { useQuery } from "@tanstack/react-query";
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle,
+  ChevronRight,
+  Clock,
+  Loader2,
+  MessageSquare,
+  Search,
+  Users,
+  Video,
+} from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { VideoCallRoom } from "../../components/shared/VideoCallRoom";
+import { Button } from "../../components/core/Button";
+import { Card, CardContent } from "../../components/core/Card";
 import { SecureTextChat } from "../../components/shared/SecureTextChat";
+import { VideoCallRoom } from "../../components/shared/VideoCallRoom";
+import { supabase } from "../../config/supabase";
+import { cn } from "../../utils/cn";
 
-// ── Types ──────────────────────────────────────────────────────
+// types
 interface PatientRecord {
   patientId: string;
   fullName: string;
@@ -39,7 +39,7 @@ const RISK_COLORS: Record<string, string> = {
   LOW: "text-green-700 bg-green-50 ring-green-200",
 };
 
-// ── Component ──────────────────────────────────────────────────
+// main component
 export function PatientList() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
@@ -108,7 +108,7 @@ export function PatientList() {
     p.fullName.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // ── Video call active ────────────────────────────────────────
+  // active call screen
   if (callPatient) {
     return (
       <VideoCallRoom
@@ -121,7 +121,7 @@ export function PatientList() {
     );
   }
 
-  // ── Chat active ──────────────────────────────────────────────
+  // active chat screen
   if (chatPatient) {
     return (
       <div className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 fade-in">

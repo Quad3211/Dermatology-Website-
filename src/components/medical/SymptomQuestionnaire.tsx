@@ -1,19 +1,19 @@
-import { useState } from "react";
 import {
-  ChevronRight,
-  ChevronLeft,
-  ClipboardList,
-  Thermometer,
-  Clock,
   Activity,
-  TrendingUp,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Clock,
   MapPin,
   MessageSquare,
+  Thermometer,
+  TrendingUp,
 } from "lucide-react";
-import { Button } from "../core/Button";
+import { useState } from "react";
 import { cn } from "../../utils/cn";
+import { Button } from "../core/Button";
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// types
 
 export interface SymptomData {
   symptomType: string;
@@ -34,7 +34,7 @@ interface Props {
   onComplete: (data: SymptomData) => void;
 }
 
-// ── Option sets ───────────────────────────────────────────────────────────
+// option sets
 
 const SYMPTOM_TYPES = [
   "Rash or irritated skin",
@@ -108,7 +108,7 @@ const BODY_PARTS = [
   "Other",
 ];
 
-// ── Step definitions ───────────────────────────────────────────────────────
+// step config
 
 interface StepConfig {
   id: string;
@@ -192,7 +192,7 @@ const STEPS: StepConfig[] = [
   },
 ];
 
-// ── Helper ─────────────────────────────────────────────────────────────────
+// empty state
 
 const EMPTY: SymptomData = {
   symptomType: "",
@@ -209,7 +209,7 @@ const EMPTY: SymptomData = {
   additionalContext: "",
 };
 
-// ── Component ──────────────────────────────────────────────────────────────
+// component
 
 export function SymptomQuestionnaire({ onComplete }: Props) {
   const [currentStep, setCurrentStep] = useState(0);
@@ -262,7 +262,7 @@ export function SymptomQuestionnaire({ onComplete }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto w-full">
-      {/* ── Header ── */}
+      {/* progress header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs font-semibold text-primary-600 uppercase tracking-wide">
@@ -297,7 +297,7 @@ export function SymptomQuestionnaire({ onComplete }: Props) {
         </div>
       </div>
 
-      {/* ── Card ── */}
+      {/* question card */}
       <div
         className={cn(
           "bg-white border border-surface-border rounded-2xl shadow-sm overflow-hidden transition-all duration-220",
@@ -408,7 +408,7 @@ export function SymptomQuestionnaire({ onComplete }: Props) {
         </div>
       </div>
 
-      {/* ── Navigation ── */}
+      {/* prev/next buttons */}
       <div className="flex items-center justify-between mt-5">
         <Button
           variant="outline"
@@ -436,7 +436,7 @@ export function SymptomQuestionnaire({ onComplete }: Props) {
         </Button>
       </div>
 
-      {/* ── Skip note on last step ── */}
+      {/* skip hint on last step */}
       {currentStep === totalSteps - 1 && (
         <p className="text-center text-xs text-slate-400 mt-3">
           This step is optional — you can leave it blank and click "Continue to

@@ -10,9 +10,7 @@ if (!supabaseUrl || !supabaseServiceKey) {
 }
 
 /**
- * Server-side Supabase client using the service-role key.
- * This bypasses Row Level Security — use only in trusted server contexts.
- * NEVER expose this client or key to the browser.
+ * server db client
  */
 export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {

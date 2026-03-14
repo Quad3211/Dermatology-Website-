@@ -1,27 +1,27 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Card, CardContent } from "../../components/core/Card";
-import { Button } from "../../components/core/Button";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle,
   Clock,
   FileSearch,
   Loader2,
-  Calendar,
   MessageSquare,
-  AlertTriangle,
-  CheckCircle,
   Video,
 } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
+import { Card, CardContent } from "../../components/core/Card";
+import { SecureTextChat } from "../../components/shared/SecureTextChat";
 import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
-import { SecureTextChat } from "../../components/shared/SecureTextChat";
 
-// ── Types ──────────────────────────────────────────────────────
+// patient history types
 interface UploadHistoryItem {
-  id: string; // upload id
+  id: string; // upload ref
   created_at: string;
-  status: string; // upload status
+  status: string; // current state
   body_part: string | null;
   analysis: {
     id: string;
@@ -83,8 +83,7 @@ export function ScanHistory() {
     },
   });
 
-  // Realtime: re-fetch when any analysis_results row changes
-  // so the page updates automatically when AI processing completes.
+  // realtime updates
   useEffect(() => {
     const channel = supabase
       .channel("scan-history-analysis-updates")
@@ -102,7 +101,7 @@ export function ScanHistory() {
     };
   }, [queryClient]);
 
-  // Find the exact consultation object for chat/call
+  // match active consultation
   const getConsultation = (id: string) => {
     for (const u of uploads) {
       const c = u.consultations?.find((c) => c.id === id);
@@ -118,13 +117,13 @@ export function ScanHistory() {
     ? getConsultation(chatConsultId)
     : null;
 
-  // ── Call View Active ──────────────────────────────────────────
+  // active call screen
   if (activeCallConsult) {
     const doctorName = activeCallConsult.doctor?.full_name
       ? `Dr. ${activeCallConsult.doctor.full_name.replace(/^Dr\.\s*/i, "")}`
       : "Your Doctor";
 
-    // Patient cannot initiate calls — show waiting screen until doctor calls
+    // prevent patient dialing
     return (
       <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
         <div className="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-4xl font-bold uppercase">
@@ -148,7 +147,7 @@ export function ScanHistory() {
     );
   }
 
-  // ── Chat View Active ──────────────────────────────────────────
+  // active message thread
   if (activeChatConsult) {
     const doctorName = activeChatConsult.doctor?.full_name
       ? `Dr. ${activeChatConsult.doctor.full_name.replace(/^Dr\.\s*/i, "")}`
@@ -204,12 +203,12 @@ export function ScanHistory() {
           <div className="space-y-6">
             {uploads.map((upload) => {
               const riskLevel = upload.analysis?.risk_level ?? "PENDING";
-              // get the most recent consultation if there are multiple
+              // pick newest session
               const consult =
                 upload.consultations?.length > 0
                   ? upload.consultations.reduce(
                       (latest, current) =>
-                        // In real app, might want to check created_at, but we'll assume the 0th is most relevant for now or pick active ones
+                        // default to active
                         current.status === "scheduled" ||
                         current.status === "pending"
                           ? current
@@ -228,7 +227,7 @@ export function ScanHistory() {
                   className="overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col md:flex-row p-0">
-                    {/* Status accent border based on RISK */}
+                    {/* dynamic risk border */}
                     <div
                       className={cn(
                         "h-1.5 md:h-auto md:w-2 shrink-0 left-0 top-0",
@@ -278,7 +277,7 @@ export function ScanHistory() {
                           </span>
                         </div>
 
-                        {/* Consultation Status Badge */}
+                        {/* booking state */}
                         <div className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider">
                           {!consult && (
                             <span className="text-slate-400 flex items-center">

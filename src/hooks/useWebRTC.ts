@@ -1,8 +1,8 @@
-import { useEffect, useRef, useCallback, useState } from "react";
-import { supabase } from "../config/supabase";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { supabase } from "../config/supabase";
 
-// ── ICE servers ───────────────────────────────────────────────
+// STUN/TURN config
 const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
@@ -52,15 +52,14 @@ export function useWebRTC({
   const localStreamRef = useRef<MediaStream | null>(null);
   const pendingOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
 
-  // ── FIX 1: callStateRef keeps the latest callState readable from inside
-  //    stale closures (the channel event handlers registered once in useEffect).
+  // callStateRef keeps state readable inside stale closures
   const callStateRef = useRef<CallState>("idle");
   const syncCallState = (s: CallState) => {
     callStateRef.current = s;
     setCallState(s);
   };
 
-  // ── FIX 2: Buffer ICE candidates that arrive before setRemoteDescription.
+  // buffer ICE candidates that arrive before setRemoteDescription
   const pendingIceCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
   // Exposed refs for video elements (VideoCallRoom attaches DOM nodes here)
@@ -69,7 +68,7 @@ export function useWebRTC({
 
   const channelName = `call:${consultationId}`;
 
-  // ── Create peer connection ─────────────────────────────────
+  // init peer connection
   const createPC = useCallback(() => {
     // Clean up any existing PC before creating a new one
     if (pcRef.current) {
@@ -110,7 +109,7 @@ export function useWebRTC({
     return pc;
   }, [onCallEnded]);
 
-  // ── Get local media ────────────────────────────────────────
+  // request mic/camera
   const getLocalMedia = useCallback(async () => {
     // Reuse existing stream if already acquired
     if (localStreamRef.current) return localStreamRef.current;
@@ -126,7 +125,7 @@ export function useWebRTC({
     return stream;
   }, []);
 
-  // ── Drain buffered ICE candidates ─────────────────────────
+  // flush buffered ICE candidates
   const drainIceCandidates = useCallback(async (pc: RTCPeerConnection) => {
     const buffered = pendingIceCandidatesRef.current.splice(0);
     for (const candidate of buffered) {
@@ -138,7 +137,7 @@ export function useWebRTC({
     }
   }, []);
 
-  // ── Handle offer (callee side) ─────────────────────────────
+  // callee receives an offer
   const handleOffer = useCallback(
     async (sdp: RTCSessionDescriptionInit) => {
       syncCallState("connecting");
@@ -161,7 +160,7 @@ export function useWebRTC({
     [createPC, getLocalMedia, drainIceCandidates],
   );
 
-  // ── Subscribe to signaling channel ────────────────────────
+  // signaling channel subscription
   useEffect(() => {
     const channel = supabase.channel(channelName, {
       config: { broadcast: { self: false } },
@@ -245,7 +244,7 @@ export function useWebRTC({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelName]);
 
-  // ── Initiate call ─────────────────────────────────────────
+  // caller starts the call
   const startCall = useCallback(
     async (myName = "") => {
       try {
@@ -281,7 +280,7 @@ export function useWebRTC({
     [createPC, getLocalMedia],
   );
 
-  // ── Accept call ───────────────────────────────────────────
+  // callee accepts
   const acceptCall = useCallback(async () => {
     syncCallState("connecting");
 
@@ -300,7 +299,7 @@ export function useWebRTC({
     }
   }, [handleOffer]);
 
-  // ── Cleanup ───────────────────────────────────────────────
+  // tear down
   const cleanup = useCallback((sendSignal = true) => {
     if (sendSignal && channelRef.current) {
       channelRef.current.send({

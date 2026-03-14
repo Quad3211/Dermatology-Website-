@@ -1,14 +1,14 @@
-import { useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
+  Loader2,
   Mic,
   MicOff,
+  PhoneOff,
+  Shield,
   Video,
   VideoOff,
-  PhoneOff,
-  Loader2,
-  AlertTriangle,
-  Shield,
 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { CallState } from "../../hooks/useWebRTC";
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { Button } from "../core/Button";
@@ -25,7 +25,7 @@ interface VideoCallRoomProps {
   webRtcState?: ReturnType<typeof useWebRTC>;
 }
 
-// ── Inner component — owns its own WebRTC hook ─────────────────
+// inner — owns its own hook
 // Only rendered when the parent did NOT provide webRtcState.
 function VideoCallRoomOwned({
   consultationId,
@@ -53,7 +53,7 @@ function VideoCallRoomOwned({
   );
 }
 
-// ── Exported component — delegates hook ownership ──────────────
+// delegates hook ownership to parent if provided
 export function VideoCallRoom({
   consultationId,
   role,
@@ -90,7 +90,7 @@ export function VideoCallRoom({
   );
 }
 
-// ── UI — shared by both paths ──────────────────────────────────
+// shared UI used by both code paths
 function VideoCallRoomUI({
   rtc,
   role,

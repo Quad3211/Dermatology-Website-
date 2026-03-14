@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
-import { CheckCircle2, AlertCircle } from "lucide-react";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Button } from "../../components/core/Button";
 import { ImageUploader } from "../../components/medical/ImageUploader";
-import { ScanningAnimation } from "../../components/shared/ScanningAnimation";
 import { RiskAssessmentWidget } from "../../components/medical/RiskAssessmentWidget";
 import { SkinBodyMap } from "../../components/medical/SkinBodyMap";
 import { SymptomQuestionnaire } from "../../components/medical/SymptomQuestionnaire";
+import { ScanningAnimation } from "../../components/shared/ScanningAnimation";
 import { supabase } from "../../config/supabase";
-import { Button } from "../../components/core/Button";
 import {
   api,
   type AnalysisResponse,
@@ -33,14 +33,14 @@ export function UploadFlow() {
     setStep("UPLOAD");
   };
 
-  // Fake progressive scanning animation while backend processes
+  // fake scan animation
   useEffect(() => {
     if (step !== "ANALYSING") return;
 
     setScanProgress(0); // Start at 0
     const interval = setInterval(() => {
       setScanProgress((p) => {
-        // Approach 95% asymptotically so it never reaches 100% until finished
+        // ease progress
         if (p >= 95) return 95;
         return p + Math.random() * 5 + 2;
       });
@@ -59,13 +59,13 @@ export function UploadFlow() {
     setStatusText("Connecting securely to storage...");
 
     try {
-      // 1. Get current user
+      // get auth user
       const {
         data: { user },
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Not signed in. Please log in and try again.");
 
-      // 2. Insert upload record into uploads table
+      // create db record
       setStatusText("Creating secure upload record..."); // Fake 10%
       setScanProgress(10);
       const { data: uploadRecord, error: insertErr } = await supabase
@@ -77,7 +77,7 @@ export function UploadFlow() {
           size_bytes: file.size,
           body_part: "unspecified",
           status: "pending",
-          storage_path: "", // updated after storage upload
+          storage_path: "", // updated later
           expires_at: new Date(
             Date.now() + 90 * 24 * 60 * 60 * 1000,
           ).toISOString(),
@@ -94,7 +94,7 @@ export function UploadFlow() {
       const uploadId = uploadRecord.id as string;
       const storagePath = `${user.id}/${uploadId}/${file.name}`;
 
-      // 3. Upload bytes to Supabase Storage
+      // save to storage
       setStatusText("Encrypting and uploading image...");
       setScanProgress(25);
       const { error: storageErr } = await supabase.storage
@@ -106,7 +106,7 @@ export function UploadFlow() {
 
       if (storageErr) throw new Error(storageErr.message);
 
-      // 4. Mark upload as uploaded
+      // update status
       setStatusText("Securing upload record...");
       setScanProgress(40);
       const { error: updateErr } = await supabase
@@ -116,7 +116,7 @@ export function UploadFlow() {
 
       if (updateErr) throw new Error(updateErr.message);
 
-      // 5. Trigger backend AI pipeline and poll until completion
+      // start ai poll
       setStatusText("Submitting image for AI analysis...");
       const queued = await api.analysis.trigger(
         uploadId,
@@ -304,7 +304,7 @@ async function pollAnalysisResult(
   analysisId: string,
   onUpdate: (result: AnalysisResponse) => void,
 ): Promise<AnalysisResponse> {
-  const maxAttempts = 90; // ~3 minutes at 2s polling
+  const maxAttempts = 90; // poll timeout
   const pollMs = 2000;
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {

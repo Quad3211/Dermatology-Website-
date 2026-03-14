@@ -1,17 +1,14 @@
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { supabase } from "../services/supabase.js";
 import type { AuthenticatedRequest } from "../types/index.js";
 
-/**
- * Low-overhead request audit log — fires async (non-blocking).
- * Logs method, path, user, IP, and user-agent.
- */
+// log every request, don't block
 export function requestAuditLogger(
   req: Request,
   _res: Response,
   next: NextFunction,
 ): void {
-  // Async fire-and-forget — do not await to avoid blocking the request
+  // fire and forget log
   void logRequest(req);
   next();
 }
@@ -20,7 +17,7 @@ async function logRequest(req: Request): Promise<void> {
   try {
     const authedReq = req as Partial<AuthenticatedRequest>;
     const event = deriveEvent(req.method, req.path);
-    if (!event) return; // Skip health check spam
+    if (!event) return; // skip health pings
 
     await supabase.from("audit_logs").insert({
       user_id: authedReq.userId ?? null,
@@ -34,11 +31,10 @@ async function logRequest(req: Request): Promise<void> {
         : null,
     });
   } catch (_err) {
-    // Never let audit failure break a request
+    // ignore audit fails
   }
 }
 
-/** Write a targeted audit log entry from business logic */
 export async function auditLog(
   event: string,
   context: {
@@ -61,14 +57,14 @@ export async function auditLog(
       user_agent: context.userAgent ?? null,
     });
   } catch (_err) {
-    // Silent fail — audit must never block business logic
+    // ignore audit fails
   }
 }
 
 function deriveEvent(method: string, path: string): string | null {
   if (path.includes("/health")) return null;
   const segments = path.split("/").filter(Boolean);
-  const resource = segments[2] ?? "unknown"; // /api/v1/<resource>
+  const resource = segments[2] ?? "unknown"; // get resource name
   const actions: Record<string, Record<string, string>> = {
     uploads: { POST: "upload.created", GET: "upload.read" },
     analysis: { POST: "analysis.queued", GET: "analysis.read" },
@@ -91,7 +87,7 @@ function deriveResourceType(path: string): string | null {
 }
 
 function extractIdFromPath(path: string): string | null {
-  // Match UUID in path: /api/v1/uploads/550e8400-e29b-41d4-a716-446655440000
+  // extract target uuid
   const uuidMatch = path.match(
     /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i,
   );

@@ -1,12 +1,12 @@
+import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import { z } from "zod";
-import { verifyJWT } from "../middleware/auth.js";
-import { requireRole } from "../middleware/rbac.js";
 import { auditLog } from "../middleware/auditLogger.js";
-import { supabase } from "../services/supabase.js";
+import { verifyJWT } from "../middleware/auth.js";
 import { HttpError } from "../middleware/errorHandler.js";
+import { requireRole } from "../middleware/rbac.js";
+import { supabase } from "../services/supabase.js";
 import type { AuthenticatedRequest } from "../types/index.js";
-import type { Request, Response, NextFunction } from "express";
 
 export const consultationsRouter = Router();
 
@@ -27,7 +27,7 @@ const UpdateConsultationSchema = z.object({
   assignedDoctorId: z.string().uuid().optional(),
 });
 
-// ── POST /consultations — book consultation ───────────────────
+// create consultation
 consultationsRouter.post(
   "/",
   verifyJWT,
@@ -45,7 +45,7 @@ consultationsRouter.post(
 
       const { analysisId, preferredDate, notes, urgency } = parsed.data;
 
-      // Verify analysis belongs to patient
+      // ensure patient owns scan
       const { data: analysis, error: analysisErr } = await supabase
         .from("analysis_results")
         .select("id, upload_id, uploads!inner(user_id)")
@@ -93,7 +93,7 @@ consultationsRouter.post(
   },
 );
 
-// ── GET /consultations — list ─────────────────────────────────
+// fetch consultations
 consultationsRouter.get(
   "/",
   verifyJWT,
@@ -123,8 +123,7 @@ consultationsRouter.get(
 
       if (authedReq.role === "patient")
         query = query.eq("patient_id", authedReq.userId);
-      // FIX: Doctors see consultations assigned to them OR unassigned (doctor_id IS NULL).
-      // Previously filtered only by doctor_id = userId, which returned empty for new consultations.
+      // filter doctor assignments
       if (authedReq.role === "doctor")
         query = query.or(`doctor_id.eq.${authedReq.userId},doctor_id.is.null`);
       if (status) query = query.eq("status", status);
@@ -143,7 +142,7 @@ consultationsRouter.get(
   },
 );
 
-// ── GET /consultations/:id ────────────────────────────────────
+// fetch single consult
 consultationsRouter.get(
   "/:id",
   verifyJWT,
@@ -178,7 +177,7 @@ consultationsRouter.get(
   },
 );
 
-// ── PATCH /consultations/:id — doctor updates ─────────────────
+// doctor status updates
 consultationsRouter.patch(
   "/:id",
   verifyJWT,

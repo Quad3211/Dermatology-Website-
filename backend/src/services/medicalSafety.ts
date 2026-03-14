@@ -6,7 +6,7 @@ const MANDATORY_DISCLAIMER =
   "Always consult a qualified, registered dermatologist. " +
   "In an emergency, call 999 (UK) or 911 (US) immediately.";
 
-// Phrases that must never appear in AI output summaries
+// banned diagnostics
 const BANNED_PHRASES = [
   "you have",
   "you are diagnosed",
@@ -27,16 +27,14 @@ export interface SafetyCheckResult {
 }
 
 /**
- * Immutable medical safety gate.
- * Called by the AI pipeline before persisting any result.
- * This function cannot be disabled via config or API params.
+ * safety gate function
  */
 export function applySafetyGate(
   rawSummary: string,
   riskLevel: RiskLevel,
   confidence: number,
 ): SafetyCheckResult {
-  // 1. Strip banned diagnostic phrases
+  // omit banned words
   let cleanSummary = rawSummary;
   let warningIssued = false;
 
@@ -48,16 +46,16 @@ export function applySafetyGate(
     }
   }
 
-  // 2. Enforce referral on HIGH or CRITICAL
+  // require referral
   const referralRequired = riskLevel === "HIGH" || riskLevel === "CRITICAL";
 
-  // 3. Enforce emergency flag on CRITICAL
+  // require emergency flag
   const emergencyFlag = riskLevel === "CRITICAL";
 
-  // 4. Append mandatory disclaimer to summary
+  // combine with disclaimer
   const fullSummary = `${cleanSummary} — ${MANDATORY_DISCLAIMER}`;
 
-  // 5. Validate confidence is in range (safety net)
+  // check confidence bounds
   if (confidence < 0 || confidence > 1) {
     throw new Error(`Invalid confidence score: ${confidence}`);
   }
@@ -71,7 +69,7 @@ export function applySafetyGate(
   };
 }
 
-/** Returns the patient-facing urgency message for a given risk level */
+/** get risk messaging */
 export function getRiskMessage(riskLevel: RiskLevel): string {
   const messages: Record<RiskLevel, string> = {
     LOW: "Low risk detected. Continue to monitor and practice regular self-examination. No immediate action required.",
@@ -84,7 +82,7 @@ export function getRiskMessage(riskLevel: RiskLevel): string {
   return messages[riskLevel];
 }
 
-/** Returns emergency contact info for CRITICAL results */
+/** get 911 info */
 export function getEmergencyInfo(): { numbers: string[]; message: string } {
   return {
     numbers: ["999", "111", "911"],

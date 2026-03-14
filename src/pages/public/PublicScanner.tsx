@@ -1,17 +1,17 @@
-import React, { useState, useRef } from "react";
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { PublicNavbar } from "../../components/shared/PublicNavbar";
-import { Button } from "../../components/core/Button";
 import {
-  UploadCloud,
-  Lock,
   Activity,
   AlertTriangle,
   ArrowRight,
   Camera,
+  Lock,
+  UploadCloud,
 } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
 import { CameraCapture } from "../../components/medical/CameraCapture";
+import { PublicNavbar } from "../../components/shared/PublicNavbar";
 import { ScanningAnimation } from "../../components/shared/ScanningAnimation";
 
 export function PublicScanner() {
@@ -50,13 +50,13 @@ export function PublicScanner() {
     setScanProgress(0);
     setScanError(null);
 
-    // Start a fake progress bar just for UX feel
+    // ux progress bar
     const interval = setInterval(() => {
       setScanProgress((prev) => (prev < 90 ? prev + 5 : prev));
     }, 200);
 
     try {
-      // 1. Convert to Base64
+      // encode base64
       const reader = new FileReader();
       const base64Promise = new Promise<string>((resolve, reject) => {
         reader.onload = () => resolve((reader.result as string).split(",")[1]);
@@ -65,7 +65,7 @@ export function PublicScanner() {
       reader.readAsDataURL(file);
       const base64Image = await base64Promise;
 
-      // 2. Call real public API
+      // call api
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
       const res = await fetch(`${apiUrl}/api/v1/public/scan`, {
         method: "POST",
@@ -137,7 +137,7 @@ export function PublicScanner() {
           transition={{ delay: 0.3 }}
           className="w-full max-w-3xl bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden"
         >
-          {/* Header */}
+          {/* scanner header */}
           <div className="bg-slate-900 px-8 py-5 flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <ScanIcon className="w-6 h-6 text-primary-400" />
@@ -215,7 +215,7 @@ export function PublicScanner() {
               )
             ) : (
               <div className="flex flex-col md:flex-row gap-8">
-                {/* Image Preview Window */}
+                {/* preview window */}
                 <div className="w-full md:w-1/2">
                   <ScanningAnimation
                     imageUrl={previewUrl}
@@ -229,7 +229,7 @@ export function PublicScanner() {
                   />
                 </div>
 
-                {/* Status Window */}
+                {/* status window */}
                 <div className="w-full md:w-1/2 flex flex-col justify-center">
                   {!isScanning && !scanComplete ? (
                     <div className="space-y-6">
@@ -348,7 +348,7 @@ export function PublicScanner() {
                       </p>
 
                       <div className="bg-slate-50 border border-slate-200 p-5 rounded-2xl relative overflow-hidden group">
-                        {/* Blur overlay requiring login */}
+                        {/* login overlay */}
                         <div className="absolute inset-0 bg-white/70 backdrop-blur-[6px] z-10 flex flex-col items-center justify-center p-6 text-center border border-slate-200/50">
                           <Lock className="w-8 h-8 text-primary-600 mb-3" />
                           <h4 className="font-bold text-slate-900 mb-1">
@@ -366,7 +366,7 @@ export function PublicScanner() {
                           </Link>
                         </div>
 
-                        {/* Blurred fake content underneath */}
+                        {/* placeholder content */}
                         <div className="space-y-3 opacity-40 select-none">
                           <div className="flex justify-between items-center pb-2 border-b border-slate-200">
                             <span className="font-bold text-slate-700">

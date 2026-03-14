@@ -1,13 +1,13 @@
-import { PublicNavbar } from "../../components/shared/PublicNavbar";
-import { ShieldPlus, Award, UserCheck, Heart, Globe, Lock } from "lucide-react";
+import { Award, Globe, Heart, Lock, ShieldPlus, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PublicNavbar } from "../../components/shared/PublicNavbar";
 
 export function AboutPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pt-20">
       <PublicNavbar />
       <div className="flex-1 max-w-5xl mx-auto px-4 sm:px-6 py-12 w-full">
-        {/* Hero */}
+        {/* hero section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="flex justify-center mb-6">
             <div className="bg-primary-100 p-4 rounded-2xl shadow-sm border border-primary-200">
@@ -24,7 +24,7 @@ export function AboutPage() {
           </p>
         </div>
 
-        {/* Mission statement */}
+        {/* mission section */}
         <div className="bg-white border border-slate-200 rounded-2xl p-8 md:p-12 shadow-sm mb-12">
           <h2 className="text-2xl font-extrabold text-slate-900 mb-4">
             Our Mission
@@ -47,7 +47,7 @@ export function AboutPage() {
           </p>
         </div>
 
-        {/* Values grid */}
+        {/* values grid */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
           <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
             <div className="flex justify-center mb-4">
@@ -92,7 +92,7 @@ export function AboutPage() {
           </div>
         </div>
 
-        {/* What we are not */}
+        {/* what we are not */}
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 mb-12">
           <h2 className="text-xl font-extrabold text-amber-900 mb-3 flex items-center gap-2">
             <Lock className="w-5 h-5" />
@@ -123,7 +123,7 @@ export function AboutPage() {
           </ul>
         </div>
 
-        {/* Global reach note */}
+        {/* global reach */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex items-start gap-6">
           <Globe className="w-8 h-8 text-primary-500 shrink-0 mt-1" />
           <div>

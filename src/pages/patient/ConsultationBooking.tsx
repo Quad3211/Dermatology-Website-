@@ -1,23 +1,23 @@
-import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
+  AlertTriangle,
   Calendar,
-  MessageSquare,
   CheckCircle2,
   Loader2,
-  AlertTriangle,
+  MessageSquare,
   UploadCloud,
 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/core/Card";
-import { Button } from "../../components/core/Button";
-import { cn } from "../../utils/cn";
 import { supabase } from "../../config/supabase";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { cn } from "../../utils/cn";
 
 export function ConsultationBooking() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -27,7 +27,7 @@ export function ConsultationBooking() {
   const [isBooked, setIsBooked] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Find most recent upload + any linked analysis (analysis may still be processing)
+  // latest active upload
   const { data: latestUpload } = useQuery({
     queryKey: ["latest-upload"],
     queryFn: async () => {
@@ -36,7 +36,7 @@ export function ConsultationBooking() {
       } = await supabase.auth.getUser();
       if (!user) return null;
 
-      // Accept any upload that's been sent to storage (uploaded, processing, or complete)
+      // allow active states
       const { data: uploads } = await supabase
         .from("uploads")
         .select("id, status")
@@ -47,7 +47,7 @@ export function ConsultationBooking() {
 
       if (!uploads?.length) return null;
 
-      // Try to find an analysis, but it's optional
+      // optional ai result
       const { data: analysis } = await supabase
         .from("analysis_results")
         .select("id, risk_level, confidence, summary, status")
@@ -60,7 +60,7 @@ export function ConsultationBooking() {
     },
   });
 
-  // Next 7 days
+  // week picker window
   const dates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
     d.setDate(d.getDate() + i + 1);
@@ -89,7 +89,7 @@ export function ConsultationBooking() {
   };
 
   const handleSubmit = async () => {
-    // Guard — analysis_id is NOT NULL in schema; block if missing
+    // block missing analysis
     if (!selectedDate || !selectedTime) return;
     if (!latestUpload?.analysis?.id) {
       setError(
@@ -178,7 +178,7 @@ export function ConsultationBooking() {
         </p>
       </div>
 
-      {/* Linked analysis — shown if analysis exists */}
+      {/* linked report banner */}
       {latestUpload?.analysis && (
         <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
           <AlertTriangle className="h-5 w-5 text-blue-600 shrink-0" />
@@ -191,7 +191,7 @@ export function ConsultationBooking() {
         </div>
       )}
 
-      {/* No upload yet — must upload first */}
+      {/* missing upload block */}
       {!latestUpload && (
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-4">
           <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
@@ -212,7 +212,7 @@ export function ConsultationBooking() {
         </div>
       )}
 
-      {/* Upload exists but analysis still processing — single consolidated banner */}
+      {/* processing banner */}
       {latestUpload && !latestUpload.analysis && (
         <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-xl p-4">
           <AlertTriangle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
@@ -229,7 +229,7 @@ export function ConsultationBooking() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Date picker */}
+        {/* calendar input */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center text-lg">
@@ -266,7 +266,7 @@ export function ConsultationBooking() {
           </CardContent>
         </Card>
 
-        {/* Time picker */}
+        {/* clock input */}
         <Card
           className={cn(
             "transition-opacity",
@@ -298,7 +298,7 @@ export function ConsultationBooking() {
         </Card>
       </div>
 
-      {/* Notes */}
+      {/* free text area */}
       <Card>
         <CardHeader>
           <CardTitle className="text-base">

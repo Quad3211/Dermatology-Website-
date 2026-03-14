@@ -1,13 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import { Phone, PhoneOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "../../config/supabase";
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { VideoCallRoom } from "./VideoCallRoom";
-import { Phone, PhoneOff } from "lucide-react";
 
-// ── Per-consultation listener ──────────────────────────────────
-// Each active consultation gets its own hook instance so the signaling
-// channel is subscribed BEFORE the doctor ever sends an offer.
-// This avoids the race condition where VideoCallRoom subscribes too late.
+// per-consultation listener — one hook per active consult
+// avoids race condition: we subscribe before the doctor sends the offer
 function ConsultationCallListener({
   consultationId,
   role,

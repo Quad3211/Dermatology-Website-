@@ -1,14 +1,12 @@
 -- ============================================================
 -- Migration 001: Initial Schema
--- AI Dermatology Triage Platform
--- Run via: npx supabase db push
 -- ============================================================
 
--- Enable extensions
+-- setup extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- Enums
+-- base enums
 CREATE TYPE user_role AS ENUM ('patient', 'doctor', 'admin');
 CREATE TYPE upload_status AS ENUM ('pending', 'uploaded', 'processing', 'complete', 'failed', 'expired');
 CREATE TYPE risk_level AS ENUM ('LOW', 'MODERATE', 'HIGH', 'CRITICAL');
@@ -16,6 +14,7 @@ CREATE TYPE consultation_status AS ENUM ('pending', 'scheduled', 'reviewed', 'cl
 CREATE TYPE urgency_level AS ENUM ('ROUTINE', 'SOON', 'HIGH', 'CRITICAL');
 
 -- ── profiles ──────────────────────────────────────────────────
+-- link to auth users
 CREATE TABLE public.profiles (
     id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     full_name       TEXT NOT NULL,
@@ -35,6 +34,7 @@ CREATE TABLE public.profiles (
 );
 
 -- ── uploads ───────────────────────────────────────────────────
+-- track user image uploads
 CREATE TABLE public.uploads (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id         UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -54,6 +54,7 @@ CREATE INDEX idx_uploads_status  ON public.uploads(status);
 CREATE INDEX idx_uploads_expires ON public.uploads(expires_at);
 
 -- ── analysis_results ──────────────────────────────────────────
+-- store AI scan results
 CREATE TABLE public.analysis_results (
     id                  UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     upload_id           UUID NOT NULL REFERENCES public.uploads(id) ON DELETE CASCADE,
@@ -85,6 +86,7 @@ CREATE INDEX idx_analysis_emergency  ON public.analysis_results(emergency_flag) 
 CREATE INDEX idx_analysis_status     ON public.analysis_results(status);
 
 -- ── consultations ─────────────────────────────────────────────
+-- link patient scans to doctors
 CREATE TABLE public.consultations (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     patient_id      UUID NOT NULL REFERENCES public.profiles(id),
@@ -108,6 +110,7 @@ CREATE INDEX idx_consult_status  ON public.consultations(status);
 CREATE INDEX idx_consult_urgency ON public.consultations(urgency);
 
 -- ── audit_logs ────────────────────────────────────────────────
+-- log system actions
 CREATE TABLE public.audit_logs (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     user_id         UUID REFERENCES public.profiles(id) ON DELETE SET NULL,

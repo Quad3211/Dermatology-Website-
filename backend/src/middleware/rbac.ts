@@ -1,9 +1,8 @@
-import type { Request, Response, NextFunction } from "express";
-import type { UserRole, AuthenticatedRequest } from "../types/index.js";
+import type { NextFunction, Request, Response } from "express";
+import type { AuthenticatedRequest, UserRole } from "../types/index.js";
 
 /**
- * Role-Based Access Control middleware factory.
- * Usage: router.get('/audit', verifyJWT, requireRole('admin'), handler)
+ * check user role
  */
 export const requireRole =
   (...roles: UserRole[]) =>

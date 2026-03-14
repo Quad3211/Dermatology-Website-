@@ -1,44 +1,43 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { SessionWatcher } from "./components/shared/SessionWatcher";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthLayout } from "./components/layout/AuthLayout";
-import { PatientLogin } from "./pages/auth/PatientLogin";
-import { PatientRegister } from "./pages/auth/PatientRegister";
+import { DoctorLayout } from "./components/layout/DoctorLayout";
+import { PatientLayout } from "./components/layout/PatientLayout";
+import { ProtectedRoute } from "./components/layout/ProtectedRoute";
+import { SessionWatcher } from "./components/shared/SessionWatcher";
 import { DoctorLogin } from "./pages/auth/DoctorLogin";
 import { DoctorRegister } from "./pages/auth/DoctorRegister";
-import { ProtectedRoute } from "./components/layout/ProtectedRoute";
-import { PatientLayout } from "./components/layout/PatientLayout";
-import { Dashboard } from "./pages/patient/Dashboard";
-import { UploadFlow } from "./pages/patient/UploadFlow";
-import { EducationView } from "./pages/patient/EducationView";
-import { ConsultationBooking } from "./pages/patient/ConsultationBooking";
-import { ScanHistory } from "./pages/patient/ScanHistory";
-import { DoctorLayout } from "./components/layout/DoctorLayout";
-import { ReviewPortal } from "./pages/doctor/ReviewPortal";
-import { PatientList } from "./pages/doctor/PatientList";
+import { PatientLogin } from "./pages/auth/PatientLogin";
+import { PatientRegister } from "./pages/auth/PatientRegister";
 import { DoctorSettings } from "./pages/doctor/DoctorSettings";
+import { PatientList } from "./pages/doctor/PatientList";
+import { ReviewPortal } from "./pages/doctor/ReviewPortal";
+import { ConsultationBooking } from "./pages/patient/ConsultationBooking";
+import { Dashboard } from "./pages/patient/Dashboard";
+import { EducationView } from "./pages/patient/EducationView";
 import { LandingPage } from "./pages/patient/LandingPage";
+import { ScanHistory } from "./pages/patient/ScanHistory";
+import { UploadFlow } from "./pages/patient/UploadFlow";
+import { AboutPage } from "./pages/public/AboutPage";
+import { ContactPage } from "./pages/public/ContactPage";
 import {
-  PrivacyPolicy,
   MedicalDisclaimer,
+  PrivacyPolicy,
   TermsOfUse,
 } from "./pages/public/LegalPages";
-import { ContactPage } from "./pages/public/ContactPage";
-import { AboutPage } from "./pages/public/AboutPage";
 import { PublicScanner } from "./pages/public/PublicScanner";
 
-// Create a client
 const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        {/* Enforce inactivity logout globally inside routing context */}
+        {/* session timeout watcher */}
         <SessionWatcher />
 
         <Routes>
-          {/* Public Auth Routes */}
+          {/* auth routes */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<PatientLogin />} />
             <Route path="/register" element={<PatientRegister />} />
@@ -46,7 +45,7 @@ function App() {
             <Route path="/doctor/register" element={<DoctorRegister />} />
           </Route>
 
-          {/* Secure Patient Routing */}
+          {/* patient routes */}
           <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
             <Route element={<PatientLayout />}>
               <Route path="/patient" element={<Dashboard />} />
@@ -60,7 +59,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* Secure Doctor Routing */}
+          {/* doctor routes */}
           <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
             <Route element={<DoctorLayout />}>
               <Route path="/doctor" element={<ReviewPortal />} />
@@ -69,7 +68,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* Public Landing Page */}
+          {/* public pages */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/scan" element={<PublicScanner />} />
           <Route path="/about" element={<AboutPage />} />
