@@ -405,7 +405,7 @@ export function Dashboard() {
                     </div>
 
                     <div className="bg-slate-50 p-5 lg:p-6 border-t md:border-t-0 md:border-l border-surface-border flex flex-col justify-center gap-3 w-full md:w-48 shrink-0">
-                      {isScheduledOrReviewed ? (
+                      {isScheduledOrReviewed && consult?.doctor ? (
                         <>
                           <Button
                             className="w-full bg-violet-600 hover:bg-violet-700 text-white"

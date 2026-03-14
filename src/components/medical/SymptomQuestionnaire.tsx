@@ -1,17 +1,16 @@
-import { useState } from "react";
 import {
-  ChevronRight,
-  ChevronLeft,
-  ClipboardList,
-  Thermometer,
-  Clock,
-  Activity,
-  TrendingUp,
-  MapPin,
-  MessageSquare,
+    Activity,
+    ChevronLeft,
+    ChevronRight,
+    ClipboardList,
+    Clock,
+    MessageSquare,
+    Thermometer,
+    TrendingUp,
 } from "lucide-react";
-import { Button } from "../core/Button";
+import { useState } from "react";
 import { cn } from "../../utils/cn";
+import { Button } from "../core/Button";
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -25,8 +24,6 @@ export interface SymptomData {
   sensationsOther: string;
   changes: string;
   changesOther: string;
-  bodyPart: string;
-  bodyPartOther: string;
   additionalContext: string;
 }
 
@@ -85,26 +82,6 @@ const CHANGES = [
   "New spots have appeared nearby",
   "It has become itchier or more painful",
   "It crusted over or formed a scab",
-  "Other",
-];
-
-const BODY_PARTS = [
-  "Face",
-  "Scalp / hairline",
-  "Neck",
-  "Chest / upper torso (front)",
-  "Back / upper torso (back)",
-  "Abdomen",
-  "Shoulder",
-  "Upper arm",
-  "Forearm / wrist",
-  "Hand / fingers",
-  "Hip / groin",
-  "Thigh",
-  "Knee",
-  "Lower leg / shin",
-  "Ankle / foot / toes",
-  "Genital or private area",
   "Other",
 ];
 
@@ -172,15 +149,6 @@ const STEPS: StepConfig[] = [
     options: CHANGES,
   },
   {
-    id: "bodyPart",
-    icon: <MapPin className="h-5 w-5" />,
-    title: "Where on your body is it located?",
-    description: "Select the region where the concern is most prominent.",
-    field: "bodyPart",
-    otherField: "bodyPartOther",
-    options: BODY_PARTS,
-  },
-  {
     id: "additionalContext",
     icon: <MessageSquare className="h-5 w-5" />,
     title: "Anything else you'd like to add?",
@@ -204,8 +172,6 @@ const EMPTY: SymptomData = {
   sensationsOther: "",
   changes: "",
   changesOther: "",
-  bodyPart: "",
-  bodyPartOther: "",
   additionalContext: "",
 };
 
