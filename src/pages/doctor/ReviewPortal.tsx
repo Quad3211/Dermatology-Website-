@@ -687,7 +687,7 @@ export function ReviewPortal() {
           {filtered.map((c) => {
             const analysis = c.analysis;
             return (
-              <button
+              <div
                 key={c.id}
                 onClick={() => {
                   setSelected(c);
@@ -700,7 +700,15 @@ export function ReviewPortal() {
                     );
                   }
                 }}
-                className="w-full text-left bg-white border border-surface-border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all group"
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setSelected(c);
+                  }
+                }}
+                className="w-full text-left bg-white border border-surface-border rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-all group cursor-pointer lg:relative"
               >
                 {/* urgery indicator */}
                 <div
@@ -812,7 +820,7 @@ export function ReviewPortal() {
                 </div>
 
                 <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-slate-500 shrink-0 transition-colors" />
-              </button>
+              </div>
             );
           })}
         </div>
