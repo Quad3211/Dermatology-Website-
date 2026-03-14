@@ -98,7 +98,7 @@ export function LandingPage() {
                     size="lg"
                     className="w-full sm:w-auto hover:scale-105 transition-transform shadow-xl hover:shadow-primary-500/20 py-6 px-8 text-lg"
                   >
-                    Start Free Screening <ArrowRight className="ml-2 w-5 h-5" />
+                    Start Screening <ArrowRight className="ml-2 w-5 h-5" />
                   </Button>
                 </Link>
                 <a href="#how-it-works" className="w-full sm:w-auto">
@@ -547,7 +547,7 @@ export function LandingPage() {
                 size="lg"
                 className="bg-white text-primary-900 hover:bg-slate-50 border-none shadow-2xl text-lg px-10 py-7 rounded-full hover:scale-105 transition-transform font-bold"
               >
-                Start Free Screening
+                Start Screening
               </Button>
             </Link>
           </motion.div>
