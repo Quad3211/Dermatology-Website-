@@ -1,10 +1,15 @@
 import { Suspense, lazy } from "react";
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import type { Location } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SessionWatcher } from "./components/shared/SessionWatcher";
 
-// Create a client
 const queryClient = new QueryClient();
 
 const lazyNamed = (factory: () => Promise<any>, name: string) =>
@@ -182,7 +187,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        {/* Enforce inactivity logout globally inside routing context */}
+        {/* session timeout watcher */}
         <SessionWatcher />
 
         <Suspense

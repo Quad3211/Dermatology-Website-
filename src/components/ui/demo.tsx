@@ -30,7 +30,7 @@ export function HeroDemo() {
               size="lg"
               className="w-full sm:w-auto hover:scale-105 transition-transform shadow-md"
             >
-              Start Free Screening <ArrowRight className="ml-2 w-5 h-5" />
+              Start Screening <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
           </Link>
           <a href="#how-it-works" className="w-full sm:w-auto">

@@ -1,7 +1,7 @@
-import { PublicNavbar } from "../../components/shared/PublicNavbar";
-import { Mail, MapPin, Phone, AlertTriangle } from "lucide-react";
-import { Button } from "../../components/core/Button";
+import { AlertTriangle, Mail, MapPin, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
+import { PublicNavbar } from "../../components/shared/PublicNavbar";
 
 export function ContactPage() {
   return (
@@ -16,7 +16,7 @@ export function ContactPage() {
           technical issues, and general inquiries about the service.
         </p>
 
-        {/* Emergency notice */}
+        {/* emergency notice */}
         <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-10 flex items-start gap-3 max-w-2xl mx-auto">
           <AlertTriangle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
           <p className="text-red-800 text-sm font-medium">
@@ -126,7 +126,7 @@ export function ContactPage() {
               </div>
             </div>
 
-            {/* Privacy note */}
+            {/* privacy note */}
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
               <p className="text-xs text-slate-500 leading-relaxed">
                 For data access, deletion requests, or privacy concerns under

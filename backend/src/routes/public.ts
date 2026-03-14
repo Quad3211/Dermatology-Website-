@@ -1,8 +1,8 @@
+import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { HttpError } from "../middleware/errorHandler.js";
-import type { Request, Response, NextFunction } from "express";
 import { analyzeSkinWithGemini } from "../services/geminiService.js";
 import { applySafetyGate } from "../services/medicalSafety.js";
 
@@ -19,7 +19,7 @@ const publicRateLimit = rateLimit({
   },
 });
 
-// FIX: Validate all incoming fields with Zod
+// public scan payload
 const PublicScanSchema = z.object({
   base64Image: z
     .string()
@@ -32,13 +32,13 @@ const PublicScanSchema = z.object({
   }),
 });
 
-// ── POST /public/scan ─────────────────────────────────────────────
+// run public scan
 publicRouter.post(
   "/scan",
   publicRateLimit,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // FIX: Validate input strictly
+      // check input
       const parsed = PublicScanSchema.safeParse(req.body);
       if (!parsed.success) {
         throw new HttpError(
@@ -52,8 +52,7 @@ publicRouter.post(
 
       const aiResult = await analyzeSkinWithGemini(base64Image, mimeType);
 
-      // FIX: Apply the medical safety gate to public scans too —
-      // strips diagnostic phrases and enforces correct referral/emergency flags.
+      // run medical safety checks
       const safeResult = applySafetyGate(
         aiResult.summary,
         aiResult.risk_level,

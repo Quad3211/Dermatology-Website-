@@ -1,22 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Request, Response, NextFunction } from "express";
+import type { NextFunction, Request, Response } from "express";
 import type { AuthenticatedRequest } from "../types/index.js";
 
-// Service-role client — bypasses RLS, used only for JWT verification + profile lookup
+// admin db client
 const verifyClient = createClient(
   process.env.SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_KEY!,
   { auth: { persistSession: false } },
 );
 
-/**
- * JWT verification middleware.
- * Reads Bearer token from Authorization header, validates via Supabase,
- * and attaches user info to req.
- *
- * SECURITY: Role is read from the `profiles` table — NOT from user_metadata
- * which is client-controlled and can be forged at signup.
- */
 export async function verifyJWT(
   req: Request,
   res: Response,
@@ -52,8 +44,7 @@ export async function verifyJWT(
     return;
   }
 
-  // SECURITY FIX: Read role from the canonical `profiles` table, NOT from
-  // user_metadata, which is set by the client at signup and can be forged.
+  // check true role
   const { data: profile } = await verifyClient
     .from("profiles")
     .select("role")

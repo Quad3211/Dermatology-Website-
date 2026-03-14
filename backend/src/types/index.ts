@@ -1,4 +1,4 @@
-// ── Domain types shared across backend ────────────────────────
+// domain models
 
 export type UserRole = "patient" | "doctor";
 export type UploadStatus =
@@ -17,7 +17,7 @@ export type ConsultationStatus =
   | "cancelled";
 export type UrgencyLevel = "ROUTINE" | "SOON" | "HIGH" | "CRITICAL";
 
-// ── Augmented Express Request ──────────────────────────────────
+// augment request
 import type { Request } from "express";
 
 export interface AuthenticatedRequest extends Request {
@@ -26,7 +26,7 @@ export interface AuthenticatedRequest extends Request {
   userEmail: string;
 }
 
-// ── Supabase row types ─────────────────────────────────────────
+// table schemas
 
 export interface Profile {
   id: string;
@@ -111,7 +111,7 @@ export interface AuditLog {
   timestamp: string;
 }
 
-// ── API Response helpers ───────────────────────────────────────
+// api response types
 
 export interface ApiError {
   error: {

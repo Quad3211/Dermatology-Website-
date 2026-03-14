@@ -1,17 +1,17 @@
+import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
 import { z } from "zod";
-import { verifyJWT } from "../middleware/auth.js";
-import { requireRole } from "../middleware/rbac.js";
 import { auditLog } from "../middleware/auditLogger.js";
-import { supabase } from "../services/supabase.js";
+import { verifyJWT } from "../middleware/auth.js";
 import { HttpError } from "../middleware/errorHandler.js";
+import { requireRole } from "../middleware/rbac.js";
+import { supabase } from "../services/supabase.js";
 import type { AuthenticatedRequest } from "../types/index.js";
-import type { Request, Response, NextFunction } from "express";
 
 export const uploadsRouter = Router();
 
-// Stricter rate limit for uploads (20/hour per IP)
+// upload rate limit
 const uploadRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 20,
@@ -23,7 +23,7 @@ const uploadRateLimit = rateLimit({
   },
 });
 
-// ── Validation schema ─────────────────────────────────────────
+// upload schema
 const CreateUploadSchema = z.object({
   filename: z
     .string()
@@ -42,7 +42,7 @@ const CreateUploadSchema = z.object({
 const STORAGE_BUCKET = "skin-images";
 const SIGNED_URL_EXPIRY = 3600; // 1 hour
 
-// ── POST /uploads ─────────────────────────────────────────────
+// prepare upload
 uploadsRouter.post(
   "/",
   verifyJWT,
@@ -64,7 +64,7 @@ uploadsRouter.post(
       const ext = filename.split(".").pop() ?? "jpg";
       const storagePath = `${authedReq.userId}/${crypto.randomUUID()}.${ext}`;
 
-      // Insert DB row (status=pending) first
+      // insert pending record
       const { data: upload, error: dbError } = await supabase
         .from("uploads")
         .insert({
@@ -82,7 +82,7 @@ uploadsRouter.post(
       if (dbError)
         throw new HttpError(500, "DB_ERROR", "Failed to create upload record.");
 
-      // Generate signed upload URL
+      // get signed url
       const { data: signedData, error: signError } = await supabase.storage
         .from(STORAGE_BUCKET)
         .createSignedUploadUrl(storagePath);
@@ -119,7 +119,7 @@ uploadsRouter.post(
   },
 );
 
-// ── GET /uploads (list own uploads) ──────────────────────────
+// list user uploads
 uploadsRouter.get(
   "/",
   verifyJWT,
@@ -143,7 +143,7 @@ uploadsRouter.get(
         .order("created_at", { ascending: false })
         .range(offset, offset + limit - 1);
 
-      // Patients only see own uploads; doctors/admins need separate filtering
+      // enforce role filters
       if (authedReq.role === "patient") {
         query = query.eq("user_id", authedReq.userId);
       }
@@ -163,7 +163,7 @@ uploadsRouter.get(
   },
 );
 
-// ── GET /uploads/:id ──────────────────────────────────────────
+// fetch single upload
 uploadsRouter.get(
   "/:id",
   verifyJWT,
@@ -181,12 +181,12 @@ uploadsRouter.get(
       if (error || !upload)
         throw new HttpError(404, "NOT_FOUND", "Upload not found.");
 
-      // Patients can only see their own
+      // check owner
       if (authedReq.role === "patient" && upload.user_id !== authedReq.userId) {
         throw new HttpError(403, "FORBIDDEN", "Access denied.");
       }
 
-      // Generate a fresh signed read URL
+      // get read url
       const { data: signedData } = await supabase.storage
         .from(STORAGE_BUCKET)
         .createSignedUrl(upload.storage_path, SIGNED_URL_EXPIRY);
@@ -198,7 +198,7 @@ uploadsRouter.get(
   },
 );
 
-// ── PATCH /uploads/:id/status (internal — mark as uploaded) ───
+// update status webhook
 uploadsRouter.patch(
   "/:id/status",
   verifyJWT,

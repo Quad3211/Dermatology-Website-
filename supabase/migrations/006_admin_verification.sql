@@ -2,14 +2,11 @@
 -- Migration 006: Admin and Doctor Verification
 -- ============================================================
 
--- 1. Add is_verified column to profiles
+-- add is_verified column
 ALTER TABLE public.profiles 
 ADD COLUMN IF NOT EXISTS is_verified BOOLEAN DEFAULT false;
 
--- Since the user_role enum already has 'admin', we just need to ensure policies allow admins to do things.
-
--- 2. Update RLS policies for Admins
--- Allow admins to view all profiles
+-- admins view all profiles
 DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
 CREATE POLICY "Admins can view all profiles" ON public.profiles
     FOR SELECT USING (
@@ -17,7 +14,7 @@ CREATE POLICY "Admins can view all profiles" ON public.profiles
         (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
     );
 
--- Allow admins to update all profiles (e.g., to verify doctors)
+-- admins verify profiles
 DROP POLICY IF EXISTS "Admins can update all profiles" ON public.profiles;
 CREATE POLICY "Admins can update all profiles" ON public.profiles
     FOR UPDATE USING (
@@ -25,7 +22,7 @@ CREATE POLICY "Admins can update all profiles" ON public.profiles
         (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin'
     );
 
--- Allow admins to view all consultations
+-- admins view all consultations
 DROP POLICY IF EXISTS "Admins can view all consultations" ON public.consultations;
 CREATE POLICY "Admins can view all consultations" ON public.consultations
     FOR SELECT USING (

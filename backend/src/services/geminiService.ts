@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI, Schema, SchemaType } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { HttpError } from "../middleware/errorHandler.js";
 
 const apiKey = process.env.GEMINI_API_KEY;
@@ -86,9 +86,9 @@ const analysisSchema: any = {
   ],
 };
 
-// FIX: Changed from invalid "gemini-2.5-flash" (caused 404) to the current stable model.
+// Use the current GA stable model
 const model = genAI.getGenerativeModel({
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-2.5-flash",
   generationConfig: {
     responseMimeType: "application/json",
     responseSchema: analysisSchema,
@@ -136,7 +136,7 @@ export async function analyzeSkinWithGemini(
   } catch (error: any) {
     console.error("[Gemini Service] Error during API call:", error);
 
-    // Catch Google's specific 429 quota/rate limit error
+    // format rate limit errs
     if (
       error?.status === 429 ||
       error?.message?.includes("429") ||
@@ -149,7 +149,7 @@ export async function analyzeSkinWithGemini(
       );
     }
 
-    // Generic fallback AI error
+    // handle standard errs
     throw new HttpError(
       500,
       "AI_SERVICE_ERROR",

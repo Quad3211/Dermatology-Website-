@@ -1,17 +1,16 @@
 /**
- * Typed API client for the DermTriage backend.
- * All calls include the Supabase JWT automatically.
+ * api client
  */
-import { supabase } from "../config/supabase";
 import type { SymptomData } from "../components/medical/SymptomQuestionnaire";
+import { supabase } from "../config/supabase";
 
-// Re-export so consumers can import from one place
+// re-export symptoms
 export type { SymptomData };
 
 const BASE_URL =
   import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3001/api/v1";
 
-// ── Types ──────────────────────────────────────────────────────
+// typescript types
 
 export interface CreateUploadPayload {
   filename: string;
@@ -102,7 +101,7 @@ export interface ConsultationPayload {
   urgency?: "ROUTINE" | "SOON" | "HIGH" | "CRITICAL";
 }
 
-// ── Fetch helper ───────────────────────────────────────────────
+// base fetch
 
 async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const {
@@ -133,7 +132,7 @@ async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// ── API Surface ────────────────────────────────────────────────
+// api methods
 
 export const api = {
   health: {

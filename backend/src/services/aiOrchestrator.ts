@@ -1,7 +1,7 @@
-import { supabase } from "./supabase.js";
 import { auditLog } from "../middleware/auditLogger.js";
 import { analyzeSkinWithGemini } from "./geminiService.js";
 import { applySafetyGate } from "./medicalSafety.js";
+import { supabase } from "./supabase.js";
 
 interface PipelineJob {
   analysisId: string;
@@ -10,16 +10,9 @@ interface PipelineJob {
   userId: string;
 }
 
-// FIX: Time-box the entire AI pipeline to 90 seconds.
-// If Gemini hangs or the download stalls, we mark the analysis as failed
-// instead of leaving it stuck in "processing" indefinitely.
+// max pipeline duration
 const PIPELINE_TIMEOUT_MS = 90_000;
 
-/**
- * Triggers the AI analysis pipeline.
- * Updates analysis_results in real-time via direct DB writes.
- * Called fire-and-forget from the analysis route.
- */
 export async function triggerAIPipeline(job: PipelineJob): Promise<void> {
   const timeout = new Promise<never>((_, reject) =>
     setTimeout(
@@ -42,13 +35,13 @@ export async function triggerAIPipeline(job: PipelineJob): Promise<void> {
 }
 
 async function runPipeline(job: PipelineJob): Promise<void> {
-  // 1. Mark as processing
+  // set processing state
   await supabase
     .from("analysis_results")
     .update({ status: "processing", started_at: new Date().toISOString() })
     .eq("id", job.analysisId);
 
-  // 2. Download the image from Supabase Storage
+  // get storage image
   const { data: fileData, error: downloadErr } = await supabase.storage
     .from("skin-images")
     .download(job.storagePath);
@@ -61,7 +54,7 @@ async function runPipeline(job: PipelineJob): Promise<void> {
     return;
   }
 
-  // 3. Convert image Blob to Base64
+  // to base64 format
   const arrayBuffer = await fileData.arrayBuffer();
   const base64Image = Buffer.from(arrayBuffer).toString("base64");
 
@@ -69,19 +62,17 @@ async function runPipeline(job: PipelineJob): Promise<void> {
   const mimeType =
     ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
 
-  // 4. Call our local Gemini service directly
+  // trigger gemini
   const aiResult = await analyzeSkinWithGemini(base64Image, mimeType);
 
-  // FIX: Apply the medical safety gate BEFORE persisting any AI output.
-  // This strips diagnostic phrases ("you have cancer", etc.) and enforces
-  // correct referral/emergency flags regardless of what Gemini returned.
+  // apply safety gate
   const safeResult = applySafetyGate(
     aiResult.summary,
     aiResult.risk_level,
     aiResult.confidence,
   );
 
-  // 5. Update analysis_results to complete (using safety-gated values)
+  // save results
   await supabase
     .from("analysis_results")
     .update({
@@ -101,13 +92,13 @@ async function runPipeline(job: PipelineJob): Promise<void> {
     })
     .eq("id", job.analysisId);
 
-  // 6. Update upload status
+  // mark upload complete
   await supabase
     .from("uploads")
     .update({ status: "complete" })
     .eq("id", job.uploadId);
 
-  // 7. Audit log
+  // add log entry
   await auditLog("analysis.complete", {
     userId: job.userId,
     resourceType: "analysis",

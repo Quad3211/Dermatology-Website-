@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  AlertCircle,
+  Loader2,
+  Lock,
+  MessageSquare,
+  RefreshCcw,
   Send,
   Shield,
-  Lock,
-  Loader2,
-  AlertCircle,
-  RefreshCcw,
   X,
-  MessageSquare,
 } from "lucide-react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../../config/supabase";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// ── Types ──────────────────────────────────────────────────────
+// types
 interface Message {
   id: string;
   sender_id?: string;
@@ -28,7 +28,7 @@ interface SecureTextChatProps {
   onClose?: () => void;
 }
 
-// ── Helpers ────────────────────────────────────────────────────
+// helpers
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString([], {
     hour: "2-digit",
@@ -55,7 +55,7 @@ function isSameDay(a: string, b: string) {
   return new Date(a).toDateString() === new Date(b).toDateString();
 }
 
-// ── Avatar ─────────────────────────────────────────────────────
+// mini avatar
 function Avatar({
   label,
   color,
@@ -74,7 +74,7 @@ function Avatar({
   );
 }
 
-// ── Main Component ─────────────────────────────────────────────
+// main chat component
 export function SecureTextChat({
   consultationId,
   role,
@@ -88,7 +88,7 @@ export function SecureTextChat({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // ── Fetch messages ───────────────────────────────────────────
+  // load messages
   const {
     data: messages = [],
     isLoading,
@@ -109,7 +109,7 @@ export function SecureTextChat({
     staleTime: 10_000,
   });
 
-  // ── Real-time subscription ───────────────────────────────────
+  // realtime sub
   useEffect(() => {
     // Clean up any previous channel
     if (channelRef.current) {
@@ -154,12 +154,12 @@ export function SecureTextChat({
     };
   }, [consultationId, role, queryClient]);
 
-  // ── Auto-scroll ──────────────────────────────────────────────
+  // scroll to bottom on new msg
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // ── Auto-grow textarea ───────────────────────────────────────
+  // grow textarea with content
   const resizeTextarea = useCallback(() => {
     const el = textareaRef.current;
     if (!el) return;
@@ -171,7 +171,7 @@ export function SecureTextChat({
     resizeTextarea();
   }, [input, resizeTextarea]);
 
-  // ── Send mutation ────────────────────────────────────────────
+  // send message
   const sendMutation = useMutation({
     mutationFn: async (text: string) => {
       const {
@@ -257,15 +257,14 @@ export function SecureTextChat({
     }
   };
 
-  // ── Derived labels ───────────────────────────────────────────
+  // label vars
   const myLabel = role === "doctor" ? "Dr." : "You";
   const theirColor = role === "doctor" ? "blue" : "emerald";
   const myColor = role === "doctor" ? "emerald" : "blue";
 
-  // ── Render ───────────────────────────────────────────────────
   return (
     <div className="flex flex-col h-full bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
-      {/* ── Header ─────────────────────────────────────────── */}
+      {/* header */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <Avatar label={otherPartyName} color={theirColor} />
@@ -298,7 +297,7 @@ export function SecureTextChat({
         </div>
       </div>
 
-      {/* ── Messages area ───────────────────────────────────── */}
+      {/* message list */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1 bg-slate-50/60">
         {/* System banner */}
         <div className="flex justify-center py-2">
@@ -426,7 +425,7 @@ export function SecureTextChat({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* ── Error banner ─────────────────────────────────────── */}
+      {/* send error */}
       {sendError && (
         <div className="mx-4 mb-2 px-4 py-2 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-xs text-red-600 gap-2 shrink-0">
           <span className="flex items-center gap-1.5">
@@ -442,7 +441,7 @@ export function SecureTextChat({
         </div>
       )}
 
-      {/* ── Input area ──────────────────────────────────────── */}
+      {/* input */}
       <div className="px-4 py-3 bg-white border-t border-slate-200 shrink-0">
         <form onSubmit={handleSend} className="flex items-end gap-2">
           <textarea

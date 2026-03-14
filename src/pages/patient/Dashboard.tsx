@@ -1,32 +1,32 @@
+import { useQuery } from "@tanstack/react-query";
+import {
+  AlertTriangle,
+  Calendar,
+  CheckCircle,
+  Clock,
+  FileSearch,
+  Loader2,
+  MessageSquare,
+  ShieldCheck,
+  UploadCloud,
+  Video,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "../../components/core/Button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "../../components/core/Card";
-import { Button } from "../../components/core/Button";
-import {
-  UploadCloud,
-  FileSearch,
-  ShieldCheck,
-  Loader2,
-  Calendar,
-  MessageSquare,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Video,
-} from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { SecureTextChat } from "../../components/shared/SecureTextChat";
 import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
-import { SecureTextChat } from "../../components/shared/SecureTextChat";
 
-// ── Types ──────────────────────────────────────────────────────
+// dashboard user data
 interface DashboardUpload {
-  id: string; // upload ID
+  id: string; // upload ref
   created_at: string;
   status: string;
   body_part: string | null;
@@ -88,7 +88,7 @@ export function Dashboard() {
     },
   });
 
-  // Find exact consultation object for chat/call
+  // match active consultation
   const getConsultation = (id: string) => {
     for (const u of uploads) {
       const c = u.consultations?.find((c) => c.id === id);
@@ -100,7 +100,7 @@ export function Dashboard() {
   const callConsult = callConsultId ? getConsultation(callConsultId) : null;
   const chatConsult = chatConsultId ? getConsultation(chatConsultId) : null;
 
-  // ── Call View Active ──────────────────────────────────────────
+  // active call screen
   if (callConsult) {
     const doctorName = callConsult.doctor?.full_name
       ? `Dr. ${callConsult.doctor.full_name.replace(/^Dr\.\s*/i, "")}`
@@ -129,7 +129,7 @@ export function Dashboard() {
     );
   }
 
-  // ── Chat View Active ──────────────────────────────────────────
+  // active message thread
   if (chatConsult) {
     const doctorName = chatConsult.doctor?.full_name
       ? `Dr. ${chatConsult.doctor.full_name.replace("Dr. ", "")}`
@@ -264,9 +264,11 @@ export function Dashboard() {
                     )
                   : null;
 
-              const isScheduledOrReviewed =
-                consult &&
-                ["scheduled", "reviewed", "closed"].includes(consult.status);
+              const canMessage = Boolean(consult);
+              const canCall =
+                Boolean(consult) &&
+                consult.status === "scheduled" &&
+                Boolean(consult.doctor);
 
               return (
                 <Card
@@ -274,7 +276,7 @@ export function Dashboard() {
                   className="overflow-hidden hover:shadow-md transition-shadow"
                 >
                   <div className="flex flex-col md:flex-row md:items-center p-0">
-                    {/* Status accent border */}
+                    {/* dynamic risk edge */}
                     <div
                       className={cn(
                         "h-1.5 md:h-auto md:w-1.5 shrink-0",
@@ -405,37 +407,32 @@ export function Dashboard() {
                     </div>
 
                     <div className="bg-slate-50 p-5 lg:p-6 border-t md:border-t-0 md:border-l border-surface-border flex flex-col justify-center gap-3 w-full md:w-48 shrink-0">
-                      {isScheduledOrReviewed ? (
+                      {consult ? (
                         <>
-                          <Button
-                            className="w-full bg-violet-600 hover:bg-violet-700 text-white"
-                            onClick={() => setCallConsultId(consult.id)}
-                          >
-                            <Video className="h-4 w-4 mr-2" />
-                            Call Doctor
-                          </Button>
-                          <Button
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                            onClick={() => setChatConsultId(consult.id)}
-                          >
-                            <MessageSquare className="h-4 w-4 mr-2" />
-                            Message Dr.
-                          </Button>
+                          {canCall && (
+                            <Button
+                              className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                              onClick={() => setCallConsultId(consult.id)}
+                            >
+                              <Video className="h-4 w-4 mr-2" />
+                              Call Doctor
+                            </Button>
+                          )}
+                          {canMessage && (
+                            <Button
+                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              onClick={() => setChatConsultId(consult.id)}
+                            >
+                              <MessageSquare className="h-4 w-4 mr-2" />
+                              Message Dr.
+                            </Button>
+                          )}
                         </>
                       ) : (
                         <Link to="/patient/consultation">
-                          <Button
-                            className="w-full"
-                            variant={
-                              consult?.status === "pending"
-                                ? "outline"
-                                : "primary"
-                            }
-                          >
+                          <Button className="w-full">
                             <Calendar className="h-4 w-4 mr-2" />
-                            {consult?.status === "pending"
-                              ? "View Request"
-                              : "Book Consult"}
+                            Book Consult
                           </Button>
                         </Link>
                       )}

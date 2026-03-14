@@ -1,9 +1,8 @@
 -- ============================================================
 -- Migration 005: Text Chat Messages Schema
--- Run this in Supabase SQL Editor
 -- ============================================================
 
--- Create the messages table
+-- chat messages table
 CREATE TABLE IF NOT EXISTS public.messages (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     consultation_id UUID NOT NULL REFERENCES public.consultations(id) ON DELETE CASCADE,
@@ -13,14 +12,14 @@ CREATE TABLE IF NOT EXISTS public.messages (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for fast lookup by consultation
+-- indexes
 CREATE INDEX IF NOT EXISTS idx_messages_consultation_id ON public.messages(consultation_id);
 CREATE INDEX IF NOT EXISTS idx_messages_created_at ON public.messages(created_at);
 
--- Enable RLS
+-- RLS
 ALTER TABLE public.messages ENABLE ROW LEVEL SECURITY;
 
--- Patients can read messages for their own consultations
+-- patients read own consult messages
 DROP POLICY IF EXISTS "patients_read_own_messages" ON public.messages;
 CREATE POLICY "patients_read_own_messages"
     ON public.messages FOR SELECT
@@ -33,7 +32,7 @@ CREATE POLICY "patients_read_own_messages"
         )
     );
 
--- Patients can insert messages for their own consultations
+-- patients send messages
 DROP POLICY IF EXISTS "patients_insert_own_messages" ON public.messages;
 CREATE POLICY "patients_insert_own_messages"
     ON public.messages FOR INSERT
@@ -47,14 +46,14 @@ CREATE POLICY "patients_insert_own_messages"
         AND sender_id = auth.uid()
     );
 
--- Doctors can read messages for any consultation
+-- doctors read any message
 DROP POLICY IF EXISTS "doctors_read_all_messages" ON public.messages;
 CREATE POLICY "doctors_read_all_messages"
     ON public.messages FOR SELECT
     TO authenticated
     USING (public.current_user_role() IN ('doctor', 'admin'));
 
--- Doctors can insert messages for any consultation
+-- doctors send any message
 DROP POLICY IF EXISTS "doctors_insert_any_message" ON public.messages;
 CREATE POLICY "doctors_insert_any_message"
     ON public.messages FOR INSERT
@@ -64,9 +63,10 @@ CREATE POLICY "doctors_insert_any_message"
         AND sender_id = auth.uid()
     );
 
--- Enable realtime for messages
+-- enable realtime for chat
 BEGIN;
   DROP PUBLICATION IF EXISTS supabase_realtime;
   CREATE PUBLICATION supabase_realtime;
 COMMIT;
+
 ALTER PUBLICATION supabase_realtime ADD TABLE public.messages;

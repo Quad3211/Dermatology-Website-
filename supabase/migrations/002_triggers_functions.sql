@@ -2,12 +2,13 @@
 -- Migration 002: Triggers + Functions
 -- ============================================================
 
--- auto-update updated_at
+-- auto update updated_at timestamps
 CREATE OR REPLACE FUNCTION update_updated_at()
 RETURNS TRIGGER LANGUAGE plpgsql AS $$
 BEGIN NEW.updated_at = now(); RETURN NEW; END;
 $$;
 
+-- attach to tables
 CREATE TRIGGER trg_profiles_updated_at
     BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 CREATE TRIGGER trg_uploads_updated_at
@@ -17,7 +18,7 @@ CREATE TRIGGER trg_analysis_updated_at
 CREATE TRIGGER trg_consultations_updated_at
     BEFORE UPDATE ON public.consultations FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
--- auto-create consultation on HIGH/CRITICAL risk
+-- auto-create consultation for high risk scans
 CREATE OR REPLACE FUNCTION create_consultation_on_high_risk()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER AS $$
 DECLARE
@@ -43,11 +44,12 @@ BEGIN
 END;
 $$;
 
+-- trigger on risk level change
 CREATE TRIGGER trg_auto_consultation
     AFTER UPDATE OF risk_level ON public.analysis_results
     FOR EACH ROW EXECUTE FUNCTION create_consultation_on_high_risk();
 
--- expire old uploads (call daily via pg_cron or Edge Function)
+-- cleanup old uploads daily
 CREATE OR REPLACE FUNCTION expire_old_uploads()
 RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
 BEGIN
@@ -60,7 +62,7 @@ BEGIN
 END;
 $$;
 
--- helper function to update pipeline stage progress
+-- update AI pipeline progress via backend
 CREATE OR REPLACE FUNCTION update_pipeline_stage(
     p_analysis_id UUID,
     p_stage TEXT,

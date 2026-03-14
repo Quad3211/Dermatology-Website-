@@ -1,17 +1,17 @@
+import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { verifyJWT } from "../middleware/auth.js";
-import { requireRole } from "../middleware/rbac.js";
 import { auditLog } from "../middleware/auditLogger.js";
-import { supabase } from "../services/supabase.js";
+import { verifyJWT } from "../middleware/auth.js";
 import { HttpError } from "../middleware/errorHandler.js";
+import { requireRole } from "../middleware/rbac.js";
 import { triggerAIPipeline } from "../services/aiOrchestrator.js";
+import { supabase } from "../services/supabase.js";
 import type { AuthenticatedRequest } from "../types/index.js";
-import type { Request, Response, NextFunction } from "express";
 
 export const analysisRouter = Router();
 
-// Stricter limit for AI analysis — prevents AI abuse
+// scan limit
 const analysisRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 10,
@@ -29,7 +29,7 @@ const MEDICAL_DISCLAIMER =
   "Always consult a qualified, registered dermatologist. " +
   "In an emergency, call 999 (UK) or 911 (US) immediately.";
 
-// ── POST /analysis/:uploadId — trigger analysis ───────────────
+// trigger scan
 analysisRouter.post(
   "/:uploadId",
   verifyJWT,
@@ -40,7 +40,7 @@ analysisRouter.post(
       const authedReq = req as AuthenticatedRequest;
       const { uploadId } = req.params;
 
-      // Validate ownership
+      // check auth
       const { data: upload, error: uploadErr } = await supabase
         .from("uploads")
         .select("id, user_id, status, storage_path")
@@ -58,7 +58,7 @@ analysisRouter.post(
           "This upload has expired and cannot be analysed.",
         );
 
-      // Check no duplicate pending analysis
+      // prevent double processing
       const { data: existing } = await supabase
         .from("analysis_results")
         .select("id, status")
@@ -76,7 +76,7 @@ analysisRouter.post(
         return;
       }
 
-      // Create analysis record
+      // write scan entry
       const { data: analysis, error: insertErr } = await supabase
         .from("analysis_results")
         .insert({ upload_id: uploadId, status: "queued", progress: 0 })
@@ -90,13 +90,13 @@ analysisRouter.post(
           "Failed to create analysis record.",
         );
 
-      // Mark upload as processing
+      // flag as processing
       await supabase
         .from("uploads")
         .update({ status: "processing" })
         .eq("id", uploadId);
 
-      // Enqueue AI pipeline (non-blocking)
+      // fire background worker
       void triggerAIPipeline({
         analysisId: analysis.id,
         uploadId: String(uploadId),
@@ -126,7 +126,7 @@ analysisRouter.post(
   },
 );
 
-// ── GET /analysis/:analysisId — poll result ───────────────────
+// poll scan status
 analysisRouter.get(
   "/:analysisId",
   verifyJWT,
@@ -144,7 +144,7 @@ analysisRouter.get(
       if (error || !analysis)
         throw new HttpError(404, "NOT_FOUND", "Analysis not found.");
 
-      // Enforce patient ownership
+      // verify patient access
       if (
         authedReq.role === "patient" &&
         (analysis.uploads as { user_id: string }).user_id !== authedReq.userId
@@ -152,14 +152,14 @@ analysisRouter.get(
         throw new HttpError(403, "FORBIDDEN", "Access denied.");
       }
 
-      // Generate a signed image URL so the caller can render the original scan
+      // get image link
       const storagePath = (analysis.uploads as { storage_path: string })
         .storage_path;
       const { data: signedData } = await supabase.storage
         .from("skin-images")
         .createSignedUrl(storagePath, 3600);
 
-      // Strip the joined uploads data from response
+      // prune raw db return
       const { uploads: _u, ...result } = analysis as Record<string, unknown>;
       void _u;
 
@@ -174,7 +174,7 @@ analysisRouter.get(
   },
 );
 
-// ── GET /analysis/upload/:uploadId — get result by upload ──────
+// get scan via upload
 analysisRouter.get(
   "/upload/:uploadId",
   verifyJWT,
@@ -210,7 +210,7 @@ analysisRouter.get(
           "No analysis found for this upload.",
         );
 
-      // Generate a signed image URL
+      // attach signed url
       const { data: signedData } = await supabase.storage
         .from("skin-images")
         .createSignedUrl(upload.storage_path, 3600);

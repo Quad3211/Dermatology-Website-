@@ -1,18 +1,18 @@
-import express from "express";
 import cors from "cors";
-import helmet from "helmet";
+import express from "express";
 import rateLimit from "express-rate-limit";
-import { uploadsRouter } from "./routes/uploads.js";
+import helmet from "helmet";
+import { requestAuditLogger } from "./middleware/auditLogger.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 import { analysisRouter } from "./routes/analysis.js";
 import { consultationsRouter } from "./routes/consultations.js";
 import { healthRouter } from "./routes/health.js";
 import { publicRouter } from "./routes/public.js";
-import { errorHandler } from "./middleware/errorHandler.js";
-import { requestAuditLogger } from "./middleware/auditLogger.js";
+import { uploadsRouter } from "./routes/uploads.js";
 
 const app = express();
 
-// ── Security headers ──────────────────────────────────────────
+// setup security headers
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -26,14 +26,14 @@ app.use(
   }),
 );
 
-// ── CORS ──────────────────────────────────────────────────────
+// setup cors
 const allowedOrigins = (
   process.env.ALLOWED_ORIGIN ?? "http://localhost:5173"
 ).split(",");
 app.use(
   cors({
     origin: (origin, cb) => {
-      // Allow requests with no origin (e.g. server-to-server)
+      // proxy support
       if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
       cb(new Error("Not allowed by CORS"));
     },
@@ -43,13 +43,13 @@ app.use(
   }),
 );
 
-// ── Body parsing ──────────────────────────────────────────────
+// body parser limit
 app.use(express.json({ limit: "10mb" }));
 
-// ── Global rate limit ─────────────────────────────────────────
+// global rate limiter
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 min
+    windowMs: 15 * 60 * 1000, // 15m limit
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
@@ -62,20 +62,20 @@ app.use(
   }),
 );
 
-// ── Audit every request ───────────────────────────────────────
+// audit all requests
 app.use(requestAuditLogger);
 
-// ── Routes ────────────────────────────────────────────────────
+// mount routes
 app.use("/api/v1/health", healthRouter);
 app.use("/api/v1/uploads", uploadsRouter);
 app.use("/api/v1/analysis", analysisRouter);
 app.use("/api/v1/consultations", consultationsRouter);
 app.use("/api/v1/public", publicRouter);
 
-// ── Central error handler ─────────────────────────────────────
+// global error catch
 app.use(errorHandler);
 
-// ── Start server ──────────────────────────────────────────────
+// start http server
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
 app.listen(PORT, () => {
   console.log(`[DermTriage API] Running on http://localhost:${PORT}`);
