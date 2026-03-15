@@ -99,13 +99,13 @@ export function useWebRTC({
     if (localContainerRef.current && localVideoTrackRef.current) {
       localVideoTrackRef.current.play(localContainerRef.current);
     }
-  }, [localContainerRef.current]);
+  }, []);
 
   useEffect(() => {
     if (remoteContainerRef.current && remoteVideoTrackRef.current) {
       remoteVideoTrackRef.current.play(remoteContainerRef.current);
     }
-  }, [remoteContainerRef.current, remoteVideoTrackRef.current]);
+  }, []);
 
   // ── Create / get Agora client ─────────────────────────────
   const getClient = useCallback(() => {

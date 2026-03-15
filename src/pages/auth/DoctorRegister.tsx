@@ -1,10 +1,10 @@
+import { motion } from "framer-motion";
+import { Activity, CheckCircle2, ShieldPlus } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { supabase } from "../../config/supabase";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../components/core/Button";
 import { Input } from "../../components/core/Input";
-import { ShieldPlus, Activity, CheckCircle2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { supabase } from "../../config/supabase";
 
 export function DoctorRegister() {
   const [email, setEmail] = useState("");
@@ -18,15 +18,27 @@ export function DoctorRegister() {
   const [isLoading, setIsLoading] = useState(false);
 
   const JAMAICA_PARISHES = [
-    "Clarendon", "Hanover", "Kingston", "Manchester", "Portland",
-    "St. Andrew", "St. Ann", "St. Catherine", "St. Elizabeth",
-    "St. James", "St. Mary", "St. Thomas", "Trelawny", "Westmoreland"
+    "Clarendon",
+    "Hanover",
+    "Kingston",
+    "Manchester",
+    "Portland",
+    "St. Andrew",
+    "St. Ann",
+    "St. Catherine",
+    "St. Elizabeth",
+    "St. James",
+    "St. Mary",
+    "St. Thomas",
+    "Trelawny",
+    "Westmoreland",
   ];
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const modalLinkState = (location.state as any)?.backgroundLocation
-    ? { backgroundLocation: (location.state as any).backgroundLocation }
+  const state = location.state as { backgroundLocation?: Location } | null;
+  const modalLinkState = state?.backgroundLocation
+    ? { backgroundLocation: state.backgroundLocation }
     : undefined;
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -34,7 +46,13 @@ export function DoctorRegister() {
     if (password !== confirmPassword) {
       return setError("Passwords do not match");
     }
-    if (!fullName || !licenseNumber || !specialty || !officeAddress || !parish) {
+    if (
+      !fullName ||
+      !licenseNumber ||
+      !specialty ||
+      !officeAddress ||
+      !parish
+    ) {
       return setError("Please fill in all professional details and address");
     }
 
@@ -60,8 +78,9 @@ export function DoctorRegister() {
       if (error) throw error;
 
       navigate("/doctor");
-    } catch (err: any) {
-      setError(err.message || "Failed to register");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to register";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +191,7 @@ export function DoctorRegister() {
                 required
               />
             </div>
-            
+
             <Input
               label="Office Address"
               type="text"
@@ -181,7 +200,7 @@ export function DoctorRegister() {
               placeholder="123 Health Ave, Suite 4"
               required
             />
-            
+
             <div className="space-y-1">
               <label className="block text-sm font-medium text-slate-700 mb-1">
                 Parish
@@ -192,9 +211,13 @@ export function DoctorRegister() {
                 required
                 className="w-full h-11 px-4 text-base bg-slate-50 border border-slate-200 rounded-xl transition-all outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 hover:border-slate-300 text-slate-900"
               >
-                <option value="" disabled>Select Parish</option>
-                {JAMAICA_PARISHES.map(p => (
-                  <option key={p} value={p}>{p}</option>
+                <option value="" disabled>
+                  Select Parish
+                </option>
+                {JAMAICA_PARISHES.map((p) => (
+                  <option key={p} value={p}>
+                    {p}
+                  </option>
                 ))}
               </select>
             </div>

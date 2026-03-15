@@ -45,10 +45,14 @@ function ConsultationCallListener({
 
   // Auto-dismiss incoming UI if the other party hung up
   useEffect(() => {
-    if (callState === "ended" || callState === "idle") {
-      setShowIncoming(false);
+    if ((callState === "ended" || callState === "idle") && showIncoming) {
+      // Defer to avoid cascading render warning during effect sync
+      const timer = setTimeout(() => {
+        if (showIncoming) setShowIncoming(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [callState]);
+  }, [callState, showIncoming]);
 
   const handleAccept = () => {
     setShowIncoming(false);
@@ -169,9 +173,11 @@ export function IncomingCallListener({
     if (!data) return;
 
     setConsultations(
-      (data as any[]).map((c) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (data as unknown as any[]).map((c) => ({
         id: c.id,
-        otherPartyName: c.profiles?.full_name
+        otherPartyName: (Array.isArray(c.profiles) ? c.profiles[0] : c.profiles)
+          ?.full_name
           ? role === "patient"
             ? `Dr. ${(c.profiles.full_name as string).replace(/^Dr\.\s*/i, "")}`
             : (c.profiles.full_name as string)
@@ -211,7 +217,7 @@ export function IncomingCallListener({
       mounted = false;
       channel.unsubscribe();
     };
-  }, [load]);
+  }, [load, role]);
 
   return (
     <>

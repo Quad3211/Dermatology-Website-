@@ -61,7 +61,8 @@ export function NotificationBell({ role }: Props) {
 
       const allNotifs: NotifItem[] = [];
 
-      for (const c of consultations as any[]) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      for (const c of consultations as unknown[] as Record<string, any>[]) {
         const senderRole = role === "patient" ? "doctor" : "patient";
         const fromName =
           role === "patient"

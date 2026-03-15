@@ -123,7 +123,6 @@ export function AboutPage() {
           </ul>
         </div>
 
-        {/* global reach */}
         <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex items-start gap-6">
           <Globe className="w-8 h-8 text-primary-500 shrink-0 mt-1" />
           <div>

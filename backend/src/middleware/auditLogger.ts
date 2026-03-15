@@ -30,7 +30,7 @@ async function logRequest(req: Request): Promise<void> {
         ? String(req.headers["user-agent"])
         : null,
     });
-  } catch (_err) {
+  } catch {
     // ignore audit fails
   }
 }
@@ -56,7 +56,7 @@ export async function auditLog(
       ip_address: context.ipAddress ?? null,
       user_agent: context.userAgent ?? null,
     });
-  } catch (_err) {
+  } catch {
     // ignore audit fails
   }
 }

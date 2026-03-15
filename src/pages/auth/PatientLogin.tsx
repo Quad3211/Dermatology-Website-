@@ -1,10 +1,10 @@
+import { motion } from "framer-motion";
+import { Activity, Lock, Scan, ShieldPlus } from "lucide-react";
 import React, { useState } from "react";
-import { useNavigate, Link, useLocation } from "react-router-dom";
-import { supabase } from "../../config/supabase";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../components/core/Button";
 import { Input } from "../../components/core/Input";
-import { ShieldPlus, Activity, Lock, Scan } from "lucide-react";
-import { motion } from "framer-motion";
+import { supabase } from "../../config/supabase";
 
 export function PatientLogin() {
   const [email, setEmail] = useState("");
@@ -13,8 +13,9 @@ export function PatientLogin() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const modalLinkState = (location.state as any)?.backgroundLocation
-    ? { backgroundLocation: (location.state as any).backgroundLocation }
+  const state = location.state as { backgroundLocation?: Location } | null;
+  const modalLinkState = state?.backgroundLocation
+    ? { backgroundLocation: state.backgroundLocation }
     : undefined;
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -39,8 +40,9 @@ export function PatientLogin() {
       } else {
         navigate("/patient");
       }
-    } catch (err: any) {
-      setError(err.message || "Failed to login");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to login";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

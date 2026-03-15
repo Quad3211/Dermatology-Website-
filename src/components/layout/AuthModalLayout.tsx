@@ -1,11 +1,12 @@
+import { X } from "lucide-react";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
 
 export function AuthModalLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const backgroundLocation = (location.state as any)?.backgroundLocation;
+  const backgroundLocation = (location.state as Record<string, unknown>)
+    ?.backgroundLocation as { pathname: string } | undefined;
   const closeTarget = backgroundLocation?.pathname || "/";
 
   useEffect(() => {
@@ -17,7 +18,7 @@ export function AuthModalLayout() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [navigate]);
+  }, [navigate, closeTarget]);
 
   return (
     <div

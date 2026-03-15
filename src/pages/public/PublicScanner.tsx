@@ -1,5 +1,3 @@
-import React, { useRef, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -9,10 +7,24 @@ import {
   Lock,
   UploadCloud,
 } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "../../components/core/Button";
 import { CameraCapture } from "../../components/medical/CameraCapture";
 import { PublicNavbar } from "../../components/shared/PublicNavbar";
 import { ScanningAnimation } from "../../components/shared/ScanningAnimation";
+
+interface ScanResult {
+  risk_level: string;
+  confidence: number;
+  severity_score: number;
+  bounding_box?: {
+    ymin: number;
+    xmin: number;
+    ymax: number;
+    xmax: number;
+  };
+}
 
 export function PublicScanner() {
   const location = useLocation();
@@ -23,7 +35,7 @@ export function PublicScanner() {
   const [scanComplete, setScanComplete] = useState(false);
   const [scanProgress, setScanProgress] = useState(0);
   const [scanError, setScanError] = useState<string | null>(null);
-  const [scanResult, setScanResult] = useState<any>(null);
+  const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [useCamera, setUseCamera] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -92,9 +104,11 @@ export function PublicScanner() {
         setIsScanning(false);
         setScanComplete(true);
       }, 600);
-    } catch (err: any) {
+    } catch (err: unknown) {
       clearInterval(interval);
-      setScanError(err.message || "An unexpected error occurred.");
+      const msg =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
+      setScanError(msg);
       setIsScanning(false);
     }
   };
@@ -393,8 +407,8 @@ export function PublicScanner() {
                           </div>
                           <div className="text-sm font-medium text-slate-500">
                             Confidence:{" "}
-                            {(scanResult?.confidence * 100).toFixed(1)}% |
-                            Severity: {scanResult?.severity_score}/10
+                            {((scanResult?.confidence || 0) * 100).toFixed(1)}%
+                            | Severity: {scanResult?.severity_score}/10
                           </div>
                           <div className="h-4 bg-slate-200 rounded w-full" />
                           <div className="h-4 bg-slate-200 rounded w-5/6" />
@@ -413,7 +427,7 @@ export function PublicScanner() {
   );
 }
 
-function ScanIcon(props: any) {
+function ScanIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -437,7 +451,7 @@ function ScanIcon(props: any) {
   );
 }
 
-function LoaderIcon(props: any) {
+function LoaderIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}

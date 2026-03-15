@@ -41,7 +41,7 @@ export function useAnalysis({
         onEmergency?.(query.data);
       }
     }
-  }, [query.data?.status, query.data?.emergencyFlag]);
+  }, [query.data, onComplete, onEmergency]);
 
   return query;
 }

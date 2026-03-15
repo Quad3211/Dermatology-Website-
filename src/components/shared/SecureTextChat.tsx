@@ -19,6 +19,7 @@ interface Message {
   sender_role: "doctor" | "patient" | "system";
   content: string;
   created_at: string;
+  is_read: boolean;
 }
 
 interface SecureTextChatProps {
@@ -114,7 +115,10 @@ export function SecureTextChat({
     if (messages.length > 0) {
       const markAsRead = async () => {
         const unreadIds = messages
-          .filter((m) => m.sender_role !== role && !(m as any).is_read)
+          .filter(
+            (m) =>
+              m.sender_role !== role && !(m as { is_read: boolean }).is_read,
+          )
           .map((m) => m.id);
 
         if (unreadIds.length > 0) {
@@ -229,6 +233,7 @@ export function SecureTextChat({
             sender_role: role,
             content: newText,
             created_at: new Date().toISOString(),
+            is_read: false,
           },
         ],
       );

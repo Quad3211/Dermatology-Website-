@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { X, RefreshCw, Check } from "lucide-react";
+import { Check, RefreshCw, X } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "../core/Button";
 
 interface CameraCaptureProps {
@@ -30,7 +30,9 @@ export function CameraCapture({ onCapture, onClose }: CameraCaptureProps) {
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[CameraCapture] startCamera failed:", msg);
       setError("Cannot access camera. Please allow permissions.");
     }
   }, [stream]);

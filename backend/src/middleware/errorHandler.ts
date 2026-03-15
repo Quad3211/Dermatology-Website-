@@ -9,7 +9,8 @@ export function errorHandler(
   err: AppError,
   req: Request,
   res: Response,
-  _next: NextFunction,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  next: NextFunction,
 ): void {
   const status = err.status ?? 500;
   const code = err.code ?? "INTERNAL_ERROR";

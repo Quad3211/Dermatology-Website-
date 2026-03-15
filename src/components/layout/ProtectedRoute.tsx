@@ -3,7 +3,6 @@ import { Navigate, Outlet } from "react-router-dom";
 import { supabase } from "../../config/supabase";
 
 export function ProtectedRoute({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   allowedRoles: _allowedRoles = [],
 }: {
   allowedRoles?: string[];

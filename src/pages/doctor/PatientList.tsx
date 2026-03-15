@@ -73,7 +73,9 @@ export function PatientList() {
 
       const map = new Map<string, PatientRecord>();
 
-      for (const c of data as any[]) {
+      for (const consult of data as unknown[]) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const c = consult as any;
         const p = c.patient;
         if (!p) continue;
         const id = p.id as string;

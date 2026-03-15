@@ -25,6 +25,7 @@ export interface SkinAnalysisOutput {
   } | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const analysisSchema: any = {
   type: SchemaType.OBJECT,
   properties: {
@@ -134,14 +135,15 @@ export async function analyzeSkinWithGemini(
         "AI returned a non-JSON response. Please try again.",
       );
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { status?: number; message?: string };
     console.error("[Gemini Service] Error during API call:", error);
 
     // format rate limit errs
     if (
-      error?.status === 429 ||
-      error?.message?.includes("429") ||
-      error?.message?.includes("Quota exceeded")
+      err.status === 429 ||
+      err.message?.includes("429") ||
+      err.message?.includes("Quota exceeded")
     ) {
       throw new HttpError(
         429,

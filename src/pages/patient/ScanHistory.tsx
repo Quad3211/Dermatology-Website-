@@ -12,6 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/core/Button";
+import { Card, CardContent } from "../../components/core/Card";
 import { SecureTextChat } from "../../components/shared/SecureTextChat";
 import { VideoCallRoom } from "../../components/shared/VideoCallRoom";
 import { supabase } from "../../config/supabase";
@@ -80,7 +81,9 @@ export function ScanHistory() {
 
       if (error) throw error;
 
-      return (data as any[]).map((item) => {
+      return (data as unknown[]).map((raw) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item = raw as Record<string, any>;
         const analysis = Array.isArray(item.analysis)
           ? item.analysis[0]
           : item.analysis;

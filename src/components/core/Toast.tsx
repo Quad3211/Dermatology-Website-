@@ -1,50 +1,17 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, MessageSquare, X } from "lucide-react";
 import { useEffect, useState } from "react";
-
-export interface ToastData {
-  id: string;
-  title: string;
-  message: string;
-  onClick?: () => void;
-  duration?: number;
-}
-
-let toastCount = 0;
-let observers: ((toasts: ToastData[]) => void)[] = [];
-let toasts: ToastData[] = [];
-
-const notify = () => {
-  observers.forEach((observer) => observer([...toasts]));
-};
-
-export const showToast = (toast: Omit<ToastData, "id">) => {
-  const id = `toast-${toastCount++}`;
-  const newToast = { ...toast, id };
-  toasts = [newToast, ...toasts].slice(0, 3); // Keep last 3
-  notify();
-
-  if (toast.duration !== 0) {
-    setTimeout(() => {
-      removeToast(id);
-    }, toast.duration || 5000);
-  }
-  return id;
-};
-
-export const removeToast = (id: string) => {
-  toasts = toasts.filter((t) => t.id !== id);
-  notify();
-};
+import {
+  removeToast,
+  subscribeToToasts,
+  type ToastData,
+} from "../../services/toastService";
 
 export function ToastContainer() {
   const [activeToasts, setActiveToasts] = useState<ToastData[]>([]);
 
   useEffect(() => {
-    observers.push(setActiveToasts);
-    return () => {
-      observers = observers.filter((o) => o !== setActiveToasts);
-    };
+    return subscribeToToasts(setActiveToasts);
   }, []);
 
   return (

@@ -4,7 +4,6 @@ import {
   ChevronRight,
   ClipboardList,
   Clock,
-  MapPin,
   MessageSquare,
   Thermometer,
   TrendingUp,
@@ -83,26 +82,6 @@ const CHANGES = [
   "New spots have appeared nearby",
   "It has become itchier or more painful",
   "It crusted over or formed a scab",
-  "Other",
-];
-
-const BODY_PARTS = [
-  "Face",
-  "Scalp / hairline",
-  "Neck",
-  "Chest / upper torso (front)",
-  "Back / upper torso (back)",
-  "Abdomen",
-  "Shoulder",
-  "Upper arm",
-  "Forearm / wrist",
-  "Hand / fingers",
-  "Hip / groin",
-  "Thigh",
-  "Knee",
-  "Lower leg / shin",
-  "Ankle / foot / toes",
-  "Genital or private area",
   "Other",
 ];
 

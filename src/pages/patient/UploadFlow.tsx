@@ -1,10 +1,9 @@
-import { useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/core/Button";
 import { ImageUploader } from "../../components/medical/ImageUploader";
 import { RiskAssessmentWidget } from "../../components/medical/RiskAssessmentWidget";
-import { SkinBodyMap } from "../../components/medical/SkinBodyMap";
 import { SymptomQuestionnaire } from "../../components/medical/SymptomQuestionnaire";
 import { ScanningAnimation } from "../../components/shared/ScanningAnimation";
 import { supabase } from "../../config/supabase";
@@ -262,9 +261,7 @@ export function UploadFlow() {
               <p className="text-sm text-red-800">{errorMsg}</p>
             </div>
             <Link to="/patient/consultation" className="block">
-              <Button className="w-full">
-                Request a Consultation Anyway
-              </Button>
+              <Button className="w-full">Request a Consultation Anyway</Button>
             </Link>
             <Button
               variant="outline"

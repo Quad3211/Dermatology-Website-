@@ -84,7 +84,9 @@ export function Dashboard() {
 
       if (error) throw error;
 
-      return (data as any[]).map((item) => {
+      return (data as unknown[]).map((raw) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const item = raw as Record<string, any>;
         const analysis = Array.isArray(item.analysis)
           ? item.analysis[0]
           : item.analysis;

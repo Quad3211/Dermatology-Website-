@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../../config/supabase";
-import { showToast } from "../core/Toast";
+import { showToast } from "../../services/toastService";
 
 export function GlobalNotificationListener() {
   const navigate = useNavigate();
@@ -31,7 +31,8 @@ export function GlobalNotificationListener() {
         )
         .eq(columnFilter, user.id);
 
-      const consultations = data as unknown as any[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const consultations = data as unknown as Record<string, any>[];
 
       if (!consultations || !mounted) return;
 

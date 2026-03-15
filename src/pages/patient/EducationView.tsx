@@ -16,6 +16,20 @@ import { ABCDEModule } from "../../components/education/ABCDEModule";
 import { VisualSymptomGallery } from "../../components/education/VisualSymptomGallery";
 import { supabase } from "../../config/supabase";
 
+interface AnalysisResult {
+  risk_level: string;
+  summary: string;
+}
+
+interface Article {
+  id: number;
+  category: string;
+  title: string;
+  description: string;
+  content: string;
+  tags: string[];
+}
+
 const categories = [
   "All",
   "Skin Cancer",
@@ -70,8 +84,10 @@ const articles = [
 export function EducationView() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [latestAnalysis, setLatestAnalysis] = useState<any>(null);
-  const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [latestAnalysis, setLatestAnalysis] = useState<AnalysisResult | null>(
+    null,
+  );
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
   useEffect(() => {
     async function fetchLatestScan() {
@@ -340,7 +356,7 @@ export function EducationView() {
                 </div>
 
                 <div className="mt-12 flex flex-wrap gap-2">
-                  {selectedArticle.tags.map((t) => (
+                  {selectedArticle.tags.map((t: string) => (
                     <span
                       key={t}
                       className="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-500 rounded-lg"

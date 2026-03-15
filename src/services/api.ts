@@ -140,7 +140,10 @@ export const api = {
   },
 
   public: {
-    getDoctors: () => apiFetch<{ success: boolean; data: any[] }>("/public/doctors").then(res => res.data),
+    getDoctors: () =>
+      apiFetch<{ success: boolean; data: Record<string, unknown>[] }>(
+        "/public/doctors",
+      ).then((res) => res.data),
   },
 
   uploads: {

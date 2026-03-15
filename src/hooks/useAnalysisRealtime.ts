@@ -73,7 +73,7 @@ export function useAnalysisRealtime({
         onEmergency?.(data);
       }
     }
-  }, [query.data?.status, query.data?.emergencyFlag]);
+  }, [query.data, onComplete, onEmergency]);
 
   return query;
 }

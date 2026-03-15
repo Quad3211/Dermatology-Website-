@@ -18,7 +18,8 @@ import { SessionWatcher } from "./components/shared/SessionWatcher";
 
 const queryClient = new QueryClient();
 
-const lazyNamed = (factory: () => Promise<any>, name: string) =>
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const lazyNamed = (factory: () => Promise<Record<string, any>>, name: string) =>
   lazy(async () => {
     const module = await factory();
     return { default: module[name] };
