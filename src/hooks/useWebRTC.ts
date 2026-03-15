@@ -20,10 +20,16 @@ if (!APP_ID) {
 function describeCallError(err: unknown): string {
   if (err && typeof err === "object") {
     const e = err as { code?: string; message?: string; name?: string };
-    // Agora permission errors
-    if (e.code === "PERMISSION_DENIED" || e.name === "NotAllowedError") {
-      return "Camera/microphone permission denied. Please allow access and try again.";
+
+    // Explicit permission/not-allowed errors
+    if (
+      e.code === "PERMISSION_DENIED" ||
+      e.name === "NotAllowedError" ||
+      e.name === "PermissionDeniedError"
+    ) {
+      return "Camera or microphone access was denied. Please check your browser settings and try again.";
     }
+
     // Agora join errors (bad App ID, expired token, etc.)
     if (
       e.code === "INVALID_VENDOR_KEY" ||
@@ -34,8 +40,17 @@ function describeCallError(err: unknown): string {
     if (e.code === "NO_AVAILABLE_CHANNEL") {
       return "Could not connect to video server. Please try again.";
     }
+
+    // Devices not found
+    if (e.name === "NotFoundError" || e.name === "DevicesNotFoundError") {
+      return "No camera or microphone found. Please connect a device and try again.";
+    }
+
     if (e.message) return e.message;
   }
+
+  if (typeof err === "string") return err;
+
   return "Video call failed. Please check your camera/microphone and try again.";
 }
 
@@ -185,6 +200,7 @@ export function useWebRTC({
     console.log("[VideoCall] Acquiring local tracks...");
     let audioTrack = localAudioTrackRef.current;
     let videoTrack = localVideoTrackRef.current;
+    let lastErr: unknown = null;
 
     if (!audioTrack) {
       try {
@@ -193,6 +209,7 @@ export function useWebRTC({
         console.log("[VideoCall] Microphone acquired.");
       } catch (err) {
         console.warn("[VideoCall] Could not acquire microphone track:", err);
+        lastErr = err;
       }
     }
 
@@ -210,10 +227,14 @@ export function useWebRTC({
         }
       } catch (err) {
         console.warn("[VideoCall] Could not acquire camera track:", err);
+        lastErr = err;
       }
     }
 
     if (!audioTrack && !videoTrack) {
+      // If we have a specific error, throw it so describeCallError can use it
+      if (lastErr) throw lastErr;
+
       throw new Error(
         "Could not access camera or microphone. Please allow permissions or connect a device.",
       );
@@ -228,12 +249,14 @@ export function useWebRTC({
     console.log("[VideoCall] Agora client state:", client.connectionState);
     if (client.connectionState !== "DISCONNECTED") return;
 
+    // CRITICAL: Request tracks FIRST to ensure we are in a User Activation context.
+    // Waiting for a join network request often breaks the user gesture bubble.
+    const { audioTrack, videoTrack } = await getLocalTracks();
+
     console.log(`[VideoCall] Joining Agora channel: ${agoraChannel}...`);
     // Note: Passing null as token works if the project is in App ID testing mode (no certificate).
     await client.join(APP_ID, agoraChannel, null, null);
     console.log("[VideoCall] Joined Agora channel successfully.");
-
-    const { audioTrack, videoTrack } = await getLocalTracks();
 
     const tracks = [];
     if (audioTrack) tracks.push(audioTrack);
