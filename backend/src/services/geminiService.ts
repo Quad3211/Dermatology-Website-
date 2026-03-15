@@ -88,15 +88,8 @@ const analysisSchema: any = {
 };
 
 // Use the current GA stable model
-// Use the current GA stable model on v1 API
 const model = genAI.getGenerativeModel(
-  {
-    model: "gemini-1.5-flash",
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: analysisSchema,
-    },
-  },
+  { model: "gemini-1.5-flash" },
   { apiVersion: "v1" },
 );
 
@@ -109,15 +102,12 @@ export async function analyzeSkinWithGemini(
 
   const prompt =
     "You are an expert dermatology AI assistant. Analyze the provided image of human skin. " +
-    "Your task is to either detect signs of skin disease OR provide general skincare tips if the skin appears healthy. " +
-    "If you detect a disease, classify it (e.g., melanoma, basal_cell_carcinoma, etc.), assign a risk level, " +
-    "severity score, and explain your findings in the summary. " +
-    "CRITICAL: If a disease/lesion is detected, you MUST provide its tightest bounding box coordinates in the 'bounding_box' field, scaled from 0 to 1000 where [0,0] is top-left and [1000,1000] is bottom-right. " +
-    "You MUST also suggest possible treatment options for all risk levels, including over-the-counter (OTC) products or natural remedies if appropriate. " +
-    "If you DO NOT detect any visible disease, classify it as 'healthy_skin', set risk to LOW, severity to 0, omit the bounding box entirely, " +
-    "and YOU MUST use the 'summary' field to provide helpful, personalized skincare tips based on the skin type, " +
-    "texture, or context in the image (e.g., 'Your skin looks well hydrated. To maintain it, consider...'). " +
-    "Respond with a strict JSON object following the instructed schema.";
+    "Your response MUST be a single JSON object. DO NOT include any markdown formatting like ```json or explainations outside the JSON. " +
+    "Instructions: Detect signs of skin disease OR provide general skincare tips. " +
+    "If disease is detected: classify it, assign risk level (LOW/MODERATE/HIGH/CRITICAL), severity score (0-10), and tightest bounding box scaled 0-1000. " +
+    "If healthy: classify as 'healthy_skin', risk LOW, severity 0, and provide personalized skincare tips in the summary. " +
+    "The summary MUST include treatment/OTC suggestions regardless of risk. " +
+    `Schema: ${JSON.stringify(analysisSchema.properties)}`;
 
   try {
     const result = await model.generateContent([
@@ -131,15 +121,21 @@ export async function analyzeSkinWithGemini(
     ]);
 
     const response = await result.response;
-    const text = response.text();
+    let text = response.text();
+
+    // extract JSON from markdown if AI ignored instructions
+    if (text.includes("```")) {
+      text = text.replace(/```(?:json)?\s*([\s\S]*?)\s*```/g, "$1").trim();
+    }
 
     try {
       return JSON.parse(text) as SkinAnalysisOutput;
     } catch {
+      console.error("[Gemini Service] Failed to parse AI response:", text);
       throw new HttpError(
         500,
         "AI_PARSE_ERROR",
-        "AI returned a non-JSON response. Please try again.",
+        "AI returned a malformed response. Please try again.",
       );
     }
   } catch (error: unknown) {
