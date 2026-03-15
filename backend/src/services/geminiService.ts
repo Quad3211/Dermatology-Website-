@@ -100,6 +100,9 @@ export async function analyzeSkinWithGemini(
   base64Image: string,
   mimeType: string,
 ): Promise<SkinAnalysisOutput> {
+  // sanitize: remove data url prefix if present
+  const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, "");
+
   const prompt =
     "You are an expert dermatology AI assistant. Analyze the provided image of human skin. " +
     "Your task is to either detect signs of skin disease OR provide general skincare tips if the skin appears healthy. " +
@@ -116,7 +119,7 @@ export async function analyzeSkinWithGemini(
     const result = await model.generateContent([
       {
         inlineData: {
-          data: base64Image,
+          data: cleanBase64,
           mimeType: mimeType,
         },
       },
@@ -153,10 +156,11 @@ export async function analyzeSkinWithGemini(
     }
 
     // handle standard errs
+    const detailedMessage = err.message ? `: ${err.message}` : "";
     throw new HttpError(
       500,
       "AI_SERVICE_ERROR",
-      "Failed to analyze image with Google AI. Please try again.",
+      `Failed to analyze image with Google AI${detailedMessage}`,
     );
   }
 }

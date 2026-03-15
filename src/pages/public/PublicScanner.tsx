@@ -85,7 +85,7 @@ export function PublicScanner() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          base64Image,
+          base64Image: base64Image.replace(/^data:image\/\w+;base64,/, ""),
           mimeType: file.type,
         }),
       });
