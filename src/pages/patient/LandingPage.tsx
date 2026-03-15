@@ -9,7 +9,6 @@ import {
   Lock,
   Search,
   Shield,
-  ShieldPlus,
   Stethoscope,
 } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -265,7 +264,7 @@ export function LandingPage() {
           >
             <motion.div variants={fadeInUp} className="lg:w-1/2">
               <div className="inline-flex items-center space-x-2 bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full text-sm font-semibold mb-6">
-                <ShieldPlus className="w-4 h-4" />
+                <img src="/dermify-logo.png" className="w-4 h-4 object-contain" alt="Dermify" />
                 <span>The Dermify Solution</span>
               </div>
               <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
@@ -569,7 +568,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-6">
             <div className="flex items-center space-x-2">
-              <ShieldPlus className="h-8 w-8 text-primary-500" />
+              <img src="/dermify-logo.png" className="h-8 w-8 object-contain" alt="Dermify Logo" />
               <span className="text-2xl font-bold tracking-tight text-white">
                 Dermify
               </span>

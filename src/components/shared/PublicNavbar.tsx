@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, Menu, ShieldPlus, X } from "lucide-react";
+import { Activity, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
@@ -52,8 +52,8 @@ export function PublicNavbar() {
             to="/"
             className="flex items-center space-x-2 transition-opacity hover:opacity-80"
           >
-            <div className="bg-primary-50 p-2 rounded-lg">
-              <ShieldPlus className="h-6 w-6 text-primary-600" />
+            <div className="p-2 rounded-lg">
+              <img src="/dermify-logo.png" className="h-8 w-8 object-contain" alt="Dermify Logo" />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900">
               Dermify
