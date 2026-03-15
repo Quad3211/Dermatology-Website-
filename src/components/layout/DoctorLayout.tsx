@@ -1,20 +1,22 @@
-import { useState } from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "../../config/supabase";
-import { Button } from "../core/Button";
-import {
-  LogOut,
-  LayoutDashboard,
-  Users,
-  Settings,
-  Menu,
-  X,
-  Loader2,
-  Bell,
-} from "lucide-react";
-import { cn } from "../../utils/cn";
-import { IncomingCallListener } from "../shared/IncomingCallListener";
 import { useQuery } from "@tanstack/react-query";
+import {
+  Bell,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Menu,
+  MessageSquare,
+  Settings,
+  Users,
+  X,
+} from "lucide-react";
+import { useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../../config/supabase";
+import { cn } from "../../utils/cn";
+import { Button } from "../core/Button";
+import { IncomingCallListener } from "../shared/IncomingCallListener";
+import { NotificationBell } from "../shared/NotificationBell";
 
 export function DoctorLayout() {
   const navigate = useNavigate();
@@ -80,6 +82,7 @@ export function DoctorLayout() {
     { name: "Review Portal", path: "/doctor", icon: LayoutDashboard },
     { name: "My Patients", path: "/doctor/patients", icon: Users },
     { name: "Settings", path: "/doctor/settings", icon: Settings },
+    { name: "Messages", path: "/doctor/messages", icon: MessageSquare },
   ];
 
   return (
@@ -125,18 +128,7 @@ export function DoctorLayout() {
               </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
-              <Link
-                to="/doctor"
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-slate-700"
-                aria-label="Messages"
-              >
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] rounded-full bg-primary-600 px-1 text-[10px] font-bold text-white flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
+              <NotificationBell role="doctor" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -164,7 +156,7 @@ export function DoctorLayout() {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="sm:hidden fixed inset-0 z-[60] bg-white relative">
+          <div className="sm:hidden fixed inset-0 z-[60] bg-white">
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
               <span className="text-sm font-semibold text-slate-500">
                 Doctor Menu

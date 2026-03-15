@@ -1,12 +1,11 @@
 import { useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "../../config/supabase";
 
 const INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 mins
 
 export function SessionWatcher() {
   const navigate = useNavigate();
-  const location = useLocation();
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastResetRef = useRef<number>(0);
 
@@ -21,9 +20,11 @@ export function SessionWatcher() {
 
       timeoutRef.current = setTimeout(async () => {
         await supabase.auth.signOut();
+        // Check the current path at time of timeout, not at mount time
+        const currentPath = window.location.pathname;
         const isProtected =
-          location.pathname.startsWith("/patient") ||
-          location.pathname.startsWith("/doctor");
+          currentPath.startsWith("/patient") ||
+          currentPath.startsWith("/doctor");
 
         if (isProtected) {
           navigate("/login");
@@ -35,7 +36,7 @@ export function SessionWatcher() {
 
     const handleActivity = () => {
       const now = Date.now();
-      // Throttle: only check session every 5s if already active
+      // Throttle: only reset the timer every 5s at most
       if (now - lastResetRef.current > 5000) {
         lastResetRef.current = now;
         startTimeout();
@@ -59,7 +60,7 @@ export function SessionWatcher() {
       );
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [location.pathname, navigate]);
+  }, [navigate]); // Removed location.pathname — navigation should NOT restart the inactivity timer
 
   return null;
 }

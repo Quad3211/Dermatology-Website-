@@ -1,9 +1,9 @@
+import { motion } from "framer-motion";
+import { Activity, Menu, ShieldPlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Button } from "../core/Button";
-import { ShieldPlus, Activity, Menu, X } from "lucide-react";
-import { motion } from "framer-motion";
 import { supabase } from "../../config/supabase";
+import { Button } from "../core/Button";
 
 export function PublicNavbar() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -60,13 +60,6 @@ export function PublicNavbar() {
             ) : (
               <>
                 <Link
-                  to="/doctor/login"
-                  state={modalLinkState}
-                  className="text-sm font-medium text-emerald-600 hover:text-emerald-700 transition-colors mr-2"
-                >
-                  Doctor Portal
-                </Link>
-                <Link
                   to="/login"
                   state={modalLinkState}
                   className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
@@ -89,11 +82,9 @@ export function PublicNavbar() {
       </div>
 
       {isMobileMenuOpen && (
-        <div className="sm:hidden fixed inset-0 z-[60] bg-white relative">
+        <div className="sm:hidden fixed inset-0 z-[60] bg-white">
           <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
-            <span className="text-sm font-semibold text-slate-500">
-              Menu
-            </span>
+            <span className="text-sm font-semibold text-slate-500">Menu</span>
             <button
               onClick={() => setIsMobileMenuOpen(false)}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600"
@@ -148,14 +139,6 @@ export function PublicNavbar() {
                   </Link>
                 ) : (
                   <div className="space-y-2">
-                    <Link
-                      to="/doctor/login"
-                      state={modalLinkState}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-emerald-700 hover:bg-emerald-50"
-                    >
-                      Doctor Portal
-                    </Link>
                     <Link
                       to="/login"
                       state={modalLinkState}

@@ -1,53 +1,25 @@
-import { useState } from "react";
-import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { supabase } from "../../config/supabase";
-import { Button } from "../core/Button";
 import {
-  LogOut,
   Activity,
-  UploadCloud,
   FileText,
-  Menu,
-  X,
   History,
-  Bell,
+  LogOut,
+  Menu,
+  MessageSquare,
+  UploadCloud,
+  X,
 } from "lucide-react";
+import { useState } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
+import { Button } from "../core/Button";
 import { IncomingCallListener } from "../shared/IncomingCallListener";
-import { useQuery } from "@tanstack/react-query";
+import { NotificationBell } from "../shared/NotificationBell";
 
 export function PatientLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const { data: unreadCount = 0 } = useQuery({
-    queryKey: ["unread-messages", "patient"],
-    queryFn: async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return 0;
-
-      const { data: consultations, error: consultErr } = await supabase
-        .from("consultations")
-        .select("id")
-        .eq("patient_id", user.id);
-
-      if (consultErr || !consultations?.length) return 0;
-      const ids = consultations.map((c) => c.id);
-
-      const { count, error: msgErr } = await supabase
-        .from("messages")
-        .select("id", { count: "exact", head: true })
-        .in("consultation_id", ids)
-        .neq("sender_role", "patient");
-
-      if (msgErr) return 0;
-      return count ?? 0;
-    },
-    staleTime: 15_000,
-  });
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -63,6 +35,7 @@ export function PatientLayout() {
     { name: "New Scan", path: "/patient/upload", icon: UploadCloud },
     { name: "Scan History", path: "/patient/history", icon: History },
     { name: "Education", path: "/patient/education", icon: FileText },
+    { name: "Messages", path: "/patient/messages", icon: MessageSquare },
   ];
 
   return (
@@ -105,18 +78,7 @@ export function PatientLayout() {
               </div>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
-              <Link
-                to="/patient"
-                className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 text-slate-500 hover:text-slate-700"
-                aria-label="Messages"
-              >
-                <Bell className="h-4 w-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] rounded-full bg-primary-600 px-1 text-[10px] font-bold text-white flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </Link>
+              <NotificationBell role="patient" />
               <Button
                 variant="ghost"
                 size="sm"
@@ -144,7 +106,7 @@ export function PatientLayout() {
 
         {/* Mobile menu */}
         {isMobileMenuOpen && (
-          <div className="sm:hidden fixed inset-0 z-[60] bg-white relative">
+          <div className="sm:hidden fixed inset-0 z-[60] bg-white">
             <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
               <span className="text-sm font-semibold text-slate-500">
                 Patient Menu
@@ -193,19 +155,14 @@ export function PatientLayout() {
                     Account
                   </div>
                   <Link
-                    to="/patient"
+                    to="/patient/messages"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="w-full flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
                   >
                     <span className="flex items-center">
-                      <Bell className="mr-3 h-5 w-5" />
+                      <MessageSquare className="mr-3 h-5 w-5" />
                       Messages
                     </span>
-                    {unreadCount > 0 && (
-                      <span className="h-6 min-w-[1.5rem] rounded-full bg-primary-600 px-2 text-xs font-bold text-white flex items-center justify-center">
-                        {unreadCount}
-                      </span>
-                    )}
                   </Link>
                   <button
                     onClick={handleLogout}

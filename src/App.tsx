@@ -1,13 +1,19 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, lazy } from "react";
+import type { Location } from "react-router-dom";
 import {
   BrowserRouter,
-  Routes,
-  Route,
   Navigate,
+  Route,
+  Routes,
   useLocation,
 } from "react-router-dom";
-import type { Location } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+const PatientMessages = lazy(() => import("./pages/patient/Messages"));
+const DoctorMessages = lazy(() => import("./pages/doctor/Messages"));
+
+import { ToastContainer } from "./components/core/Toast";
+import { ProtectedRoute } from "./components/layout/ProtectedRoute";
+import { GlobalNotificationListener } from "./components/shared/GlobalNotificationListener";
 import { SessionWatcher } from "./components/shared/SessionWatcher";
 
 const queryClient = new QueryClient();
@@ -25,10 +31,6 @@ const AuthLayout = lazyNamed(
 const AuthModalLayout = lazyNamed(
   () => import("./components/layout/AuthModalLayout"),
   "AuthModalLayout",
-);
-const ProtectedRoute = lazyNamed(
-  () => import("./components/layout/ProtectedRoute"),
-  "ProtectedRoute",
 );
 const PatientLayout = lazyNamed(
   () => import("./components/layout/PatientLayout"),
@@ -136,24 +138,24 @@ function AppRoutes() {
 
         {/* Secure Patient Routing */}
         <Route element={<ProtectedRoute allowedRoles={["patient"]} />}>
-          <Route element={<PatientLayout />}>
-            <Route path="/patient" element={<Dashboard />} />
-            <Route path="/patient/upload" element={<UploadFlow />} />
-            <Route path="/patient/education" element={<EducationView />} />
-            <Route
-              path="/patient/consultation"
-              element={<ConsultationBooking />}
-            />
-            <Route path="/patient/history" element={<ScanHistory />} />
+          <Route path="/patient" element={<PatientLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="upload" element={<UploadFlow />} />
+            <Route path="scan/:id" element={<ScanHistory />} />
+            <Route path="history" element={<ScanHistory />} />
+            <Route path="education" element={<EducationView />} />
+            <Route path="messages" element={<PatientMessages />} />
+            <Route path="consultation" element={<ConsultationBooking />} />
           </Route>
         </Route>
 
         {/* Secure Doctor Routing */}
         <Route element={<ProtectedRoute allowedRoles={["doctor"]} />}>
-          <Route element={<DoctorLayout />}>
-            <Route path="/doctor" element={<ReviewPortal />} />
-            <Route path="/doctor/patients" element={<PatientList />} />
-            <Route path="/doctor/settings" element={<DoctorSettings />} />
+          <Route path="/doctor" element={<DoctorLayout />}>
+            <Route index element={<ReviewPortal />} />
+            <Route path="patients" element={<PatientList />} />
+            <Route path="settings" element={<DoctorSettings />} />
+            <Route path="messages" element={<DoctorMessages />} />
           </Route>
         </Route>
 
@@ -189,6 +191,10 @@ function App() {
       <BrowserRouter>
         {/* session timeout watcher */}
         <SessionWatcher />
+
+        {/* Global UI listeners */}
+        <ToastContainer />
+        <GlobalNotificationListener />
 
         <Suspense
           fallback={
