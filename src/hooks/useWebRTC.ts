@@ -68,12 +68,14 @@ interface UseWebRTCOptions {
   role?: "doctor" | "patient";
   onIncomingCall?: (callerName: string) => void;
   onCallEnded?: () => void;
+  onSubscribed?: () => void;
 }
 
 export function useWebRTC({
   consultationId,
   onIncomingCall,
   onCallEnded,
+  onSubscribed,
 }: UseWebRTCOptions) {
   const [callState, setCallState] = useState<CallState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +104,8 @@ export function useWebRTC({
   const remoteContainerRef = useRef<HTMLDivElement | null>(null);
 
   const callStateRef = useRef<CallState>("idle");
+  // Store caller name so we can re-ring when patient sends caller-ready
+  const callerNameRef = useRef("");
   const syncCallState = (s: CallState) => {
     callStateRef.current = s;
     setCallState(s);
@@ -191,6 +195,21 @@ export function useWebRTC({
         console.log("[VideoCall] Call accepted by remote party.");
         callAcceptedRef.current = true;
       })
+      .on("broadcast", { event: "caller-ready" }, () => {
+        // Patient's subscription is ready — re-send call-request immediately if we are still calling
+        // This solves the race where patient subscribes after the first ring burst
+        if (
+          callStateRef.current === "calling" ||
+          callStateRef.current === "connecting"
+        ) {
+          console.log("[VideoCall] caller-ready received — re-ringing immediately.");
+          channelRef.current?.send({
+            type: "broadcast",
+            event: "call-request",
+            payload: { callerName: callerNameRef.current },
+          });
+        }
+      })
       .on("broadcast", { event: "call-ended" }, () => {
         console.log("[VideoCall] Incoming call-ended broadcast.");
         syncCallState("ended");
@@ -200,6 +219,7 @@ export function useWebRTC({
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
           isSubscribedRef.current = true;
+          onSubscribed?.();
         }
       });
 
@@ -297,11 +317,16 @@ export function useWebRTC({
         setError(null);
         syncCallState("calling");
         callAcceptedRef.current = false;
+        callerNameRef.current = myName;
 
-        // Fix 2: reduced to 2 retries (3 total sends). Loop stops early if
-        // callee sends a call-accepted ack OR if this side is no longer calling.
+        // Ring for up to 30 seconds (10 attempts × 3s gaps).
+        // This window must be long enough for the patient's Supabase subscription
+        // to initialise after page load. The loop stops immediately when:
+        //  - Patient sends `call-accepted` (callAcceptedRef flips to true)
+        //  - Patient subscribes and sends `caller-ready` (separate handler re-rings instantly)
+        //  - Call is ended/errored on this side
         let attempts = 0;
-        const maxAttempts = 2;
+        const maxAttempts = 10; // 10 × 3 000ms = 30s total
 
         const sendOffer = () => {
           // Stop if accepted or call was ended/errored
@@ -316,7 +341,7 @@ export function useWebRTC({
 
           if (isSubscribedRef.current && channelRef.current) {
             console.log(
-              `[VideoCall] Sending call-request broadcast (attempt ${attempts + 1})...`,
+              `[VideoCall] Sending call-request broadcast (attempt ${attempts + 1}/${maxAttempts})...`,
             );
             channelRef.current.send({
               type: "broadcast",
@@ -326,10 +351,10 @@ export function useWebRTC({
 
             if (attempts < maxAttempts) {
               attempts++;
-              setTimeout(sendOffer, 1500);
+              setTimeout(sendOffer, 3000); // 3 second gap between rings
             }
-          } else if (attempts < 50) {
-            // Not subscribed yet — wait and retry
+          } else if (attempts < 100) {
+            // Not subscribed yet — wait 200ms and retry
             attempts++;
             setTimeout(sendOffer, 200);
           }
@@ -425,6 +450,18 @@ export function useWebRTC({
     localVideoTrackRef.current?.setEnabled(enabled);
   }, []);
 
+  // ── Ping the doctor that we are ready to receive calls ─────
+  // Patient calls this when their subscription is live so the doctor re-rings
+  const pingCallerReady = useCallback(() => {
+    if (isSubscribedRef.current && channelRef.current) {
+      channelRef.current.send({
+        type: "broadcast",
+        event: "caller-ready",
+        payload: {},
+      });
+    }
+  }, []);
+
   return {
     callState,
     error,
@@ -439,5 +476,6 @@ export function useWebRTC({
     endCall,
     setMicEnabled,
     setCamEnabled,
+    pingCallerReady,
   };
 }

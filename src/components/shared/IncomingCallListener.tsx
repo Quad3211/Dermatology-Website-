@@ -1,5 +1,5 @@
 import { Phone, PhoneOff } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../../config/supabase";
 import { useWebRTC } from "../../hooks/useWebRTC";
 import { VideoCallRoom } from "./VideoCallRoom";
@@ -34,14 +34,28 @@ function ConsultationCallListener({
     setShowRoom(false);
   }, []);
 
+  // Use a ref so onSubscribed (a stable callback) can call the latest pingCallerReady
+  // without creating a circular dependency in the hook call
+  const pingRef = useRef<(() => void) | null>(null);
+
+  const handleSubscribed = useCallback(() => {
+    if (role === "patient") {
+      pingRef.current?.();
+    }
+  }, [role]);
+
   const webRtcState = useWebRTC({
     consultationId,
     role,
     onIncomingCall: handleIncomingCall,
     onCallEnded: handleCallEnded,
+    onSubscribed: handleSubscribed,
   });
 
-  const { callState, acceptCall, endCall } = webRtcState;
+  const { callState, acceptCall, endCall, pingCallerReady } = webRtcState;
+
+  // Keep the ref up-to-date with the latest stable function from the hook
+  pingRef.current = pingCallerReady;
 
   // Auto-dismiss incoming UI if the other party hung up
   useEffect(() => {
