@@ -181,10 +181,12 @@ export function useWebRTC({
     channel
       .on("broadcast", { event: "call-request" }, ({ payload }) => {
         console.log("[VideoCall] Incoming call-request broadcast:", payload);
-        // Fix 1: Only show incoming UI if we are idle.
-        // Late duplicate signals must NOT override connecting/connected/calling states.
-        if (callStateRef.current !== "idle") {
-          console.log(`[VideoCall] Ignoring duplicate call-request (state=${callStateRef.current})`);
+        // Allow incoming calls when idle OR ended.
+        // 'ended' means the previous call finished and tracks were cleaned up —
+        // the state machine is ready to accept a new call.
+        const st = callStateRef.current;
+        if (st !== "idle" && st !== "ended") {
+          console.log(`[VideoCall] Ignoring duplicate call-request (state=${st})`);
           return;
         }
         syncCallState("incoming");
@@ -433,6 +435,9 @@ export function useWebRTC({
     if (client && client.connectionState !== "DISCONNECTED") {
       client.leave().catch(() => {});
     }
+    // Reset the client ref so the next call gets a fresh Agora client
+    // (avoids stale connection state from the previous call)
+    clientRef.current = null;
   }, []);
 
   const endCall = useCallback(() => {
