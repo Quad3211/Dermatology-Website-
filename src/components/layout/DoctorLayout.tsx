@@ -10,7 +10,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
@@ -22,6 +23,17 @@ export function DoctorLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ["unread-messages", "doctor"],
@@ -156,90 +168,92 @@ export function DoctorLayout() {
         </div>
 
         {/* Mobile menu */}
-        {isMobileMenuOpen && (
-          <div className="sm:hidden fixed inset-0 z-[60] bg-white">
-            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
-              <span className="text-sm font-semibold text-slate-500">
-                Doctor Menu
-              </span>
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600"
-                aria-label="Close menu"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+        {isMobileMenuOpen &&
+          createPortal(
+            <div className="sm:hidden fixed inset-0 z-[100] bg-white">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
+                <span className="text-sm font-semibold text-slate-500">
+                  Doctor Menu
+                </span>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600"
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
-            <div className="h-[calc(100dvh-4.5rem)] overflow-y-auto snap-y snap-mandatory">
-              <div className="min-h-full flex flex-col px-6 py-6 snap-start">
-                <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Navigation
-                </div>
-                <div className="space-y-2">
-                  {navLinks.map((link) => {
-                    const isActive = location.pathname === link.path;
-                    const Icon = link.icon;
-                    return (
-                      <Link
-                        key={link.name}
-                        to={link.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={cn(
-                          "flex items-center justify-between rounded-2xl border px-4 py-4 text-base font-semibold transition",
-                          isActive
-                            ? "border-primary-200 bg-primary-50 text-primary-700"
-                            : "border-slate-200 text-slate-700 hover:bg-slate-50",
-                        )}
-                      >
-                        <span className="flex items-center">
-                          <Icon className="mr-3 h-5 w-5" />
-                          {link.name}
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </div>
-
-                <div className="mt-6 border-t border-slate-100 pt-6">
+              <div className="h-[calc(100dvh-4.5rem)] overflow-y-auto snap-y snap-mandatory">
+                <div className="min-h-full flex flex-col px-6 py-6 snap-start">
                   <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                    Account
+                    Navigation
                   </div>
-                  <Link
-                    to="/doctor"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="w-full flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    <span className="flex items-center">
-                      <Bell className="mr-3 h-5 w-5" />
-                      Messages
-                    </span>
-                    {unreadCount > 0 && (
-                      <span className="h-6 min-w-[1.5rem] rounded-full bg-primary-600 px-2 text-xs font-bold text-white flex items-center justify-center">
-                        {unreadCount}
+                  <div className="space-y-2">
+                    {navLinks.map((link) => {
+                      const isActive = location.pathname === link.path;
+                      const Icon = link.icon;
+                      return (
+                        <Link
+                          key={link.name}
+                          to={link.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={cn(
+                            "flex items-center justify-between rounded-2xl border px-4 py-4 text-base font-semibold transition",
+                            isActive
+                              ? "border-primary-200 bg-primary-50 text-primary-700"
+                              : "border-slate-200 text-slate-700 hover:bg-slate-50"
+                          )}
+                        >
+                          <span className="flex items-center">
+                            <Icon className="mr-3 h-5 w-5" />
+                            {link.name}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-6 border-t border-slate-100 pt-6">
+                    <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      Account
+                    </div>
+                    <Link
+                      to="/doctor"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="w-full flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      <span className="flex items-center">
+                        <Bell className="mr-3 h-5 w-5" />
+                        Messages
                       </span>
-                    )}
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
-                  >
-                    <span className="flex items-center">
-                      <LogOut className="mr-3 h-5 w-5" />
-                      Sign Out
-                    </span>
-                  </button>
+                      {unreadCount > 0 && (
+                        <span className="h-6 min-w-[1.5rem] rounded-full bg-primary-600 px-2 text-xs font-bold text-white flex items-center justify-center">
+                          {unreadCount}
+                        </span>
+                      )}
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
+                    >
+                      <span className="flex items-center">
+                        <LogOut className="mr-3 h-5 w-5" />
+                        Sign Out
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center space-y-2">
+                  <span className="h-2 w-2 rounded-full bg-slate-900" />
+                  <span className="h-2 w-2 rounded-full bg-slate-300" />
+                  <span className="mt-2 h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-500 animate-spin" />
                 </div>
               </div>
-
-              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center space-y-2">
-                <span className="h-2 w-2 rounded-full bg-slate-900" />
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                <span className="mt-2 h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-500 animate-spin" />
-              </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
       </nav>
 
       <main className="flex-1 w-full mx-auto relative p-4 lg:p-6">

@@ -55,7 +55,9 @@ function ConsultationCallListener({
   const { callState, acceptCall, endCall, pingCallerReady } = webRtcState;
 
   // Keep the ref up-to-date with the latest stable function from the hook
-  pingRef.current = pingCallerReady;
+  useEffect(() => {
+    pingRef.current = pingCallerReady;
+  }, [pingCallerReady]);
 
   // Auto-dismiss incoming UI if the other party hung up
   useEffect(() => {

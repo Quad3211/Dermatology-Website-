@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Activity, Menu, ShieldPlus, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
 import { supabase } from "../../config/supabase";
 import { Button } from "../core/Button";
@@ -11,6 +12,17 @@ export function PublicNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const modalLinkState = { backgroundLocation: location };
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isMobileMenuOpen]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -81,78 +93,80 @@ export function PublicNavbar() {
         </div>
       </div>
 
-      {isMobileMenuOpen && (
-        <div className="sm:hidden fixed inset-0 z-[60] bg-white">
-          <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
-            <span className="text-sm font-semibold text-slate-500">Menu</span>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600"
-              aria-label="Close menu"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+      {isMobileMenuOpen &&
+        createPortal(
+          <div className="sm:hidden fixed inset-0 z-[100] bg-white">
+            <div className="flex items-center justify-between px-4 py-4 border-b border-slate-100">
+              <span className="text-sm font-semibold text-slate-500">Menu</span>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600"
+                aria-label="Close menu"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
 
-          <div className="h-[calc(100dvh-4.5rem)] overflow-y-auto snap-y snap-mandatory">
-            <div className="min-h-full flex flex-col px-6 py-6 snap-start">
-              <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                Explore
-              </div>
-              <div className="space-y-2">
-                <Link
-                  to="/about"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  About
-                </Link>
-                <Link
-                  to="/contact"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Contact
-                </Link>
-              </div>
-
-              <div className="mt-6 border-t border-slate-100 pt-6">
+            <div className="h-[calc(100dvh-4.5rem)] overflow-y-auto snap-y snap-mandatory">
+              <div className="min-h-full flex flex-col px-6 py-6 snap-start">
                 <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Account
+                  Explore
                 </div>
-                {isAuthenticated === null ? (
-                  <div className="h-12 w-full rounded-2xl bg-slate-100 animate-pulse" />
-                ) : isAuthenticated ? (
+                <div className="space-y-2">
                   <Link
-                    to={userRole === "doctor" ? "/doctor" : "/patient"}
+                    to="/about"
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
                   >
-                    Go to {userRole === "doctor" ? "Portal" : "Dashboard"}
+                    About
                   </Link>
-                ) : (
-                  <div className="space-y-2">
+                  <Link
+                    to="/contact"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    Contact
+                  </Link>
+                </div>
+
+                <div className="mt-6 border-t border-slate-100 pt-6">
+                  <div className="mb-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Account
+                  </div>
+                  {isAuthenticated === null ? (
+                    <div className="h-12 w-full rounded-2xl bg-slate-100 animate-pulse" />
+                  ) : isAuthenticated ? (
                     <Link
-                      to="/login"
-                      state={modalLinkState}
+                      to={userRole === "doctor" ? "/doctor" : "/patient"}
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
                     >
-                      Log In
+                      Go to {userRole === "doctor" ? "Portal" : "Dashboard"}
                     </Link>
-                  </div>
-                )}
+                  ) : (
+                    <div className="space-y-2">
+                      <Link
+                        to="/login"
+                        state={modalLinkState}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
+                      >
+                        Log In
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center space-y-2">
+                <span className="h-2 w-2 rounded-full bg-slate-900" />
+                <span className="h-2 w-2 rounded-full bg-slate-300" />
+                <span className="mt-2 h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-500 animate-spin" />
               </div>
             </div>
-
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col items-center space-y-2">
-              <span className="h-2 w-2 rounded-full bg-slate-900" />
-              <span className="h-2 w-2 rounded-full bg-slate-300" />
-              <span className="mt-2 h-6 w-6 rounded-full border-2 border-slate-200 border-t-slate-500 animate-spin" />
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </motion.nav>
   );
 }
