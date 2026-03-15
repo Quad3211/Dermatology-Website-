@@ -90,6 +90,8 @@ export function useWebRTC({
   // Supabase signaling channel (ring / hang-up only)
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isSubscribedRef = useRef(false);
+  // Fix 2: tracks whether callee has sent a call-accepted ack so ring loop stops
+  const callAcceptedRef = useRef(false);
 
   // Shared refs for video containers (VideoCallRoom attaches DOM div refs here)
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -136,11 +138,16 @@ export function useWebRTC({
           if (remoteContainerRef.current && user.videoTrack) {
             user.videoTrack.play(remoteContainerRef.current);
           }
+          // Fix 3: set connected on video
           syncCallState("connected");
         }
         if (mediaType === "audio") {
           remoteAudioTrackRef.current = user.audioTrack ?? null;
           user.audioTrack?.play();
+          // Fix 3: also set connected on audio in case video is off/delayed
+          if (callStateRef.current === "connecting") {
+            syncCallState("connected");
+          }
         }
       });
 
@@ -170,8 +177,19 @@ export function useWebRTC({
     channel
       .on("broadcast", { event: "call-request" }, ({ payload }) => {
         console.log("[VideoCall] Incoming call-request broadcast:", payload);
+        // Fix 1: Only show incoming UI if we are idle.
+        // Late duplicate signals must NOT override connecting/connected/calling states.
+        if (callStateRef.current !== "idle") {
+          console.log(`[VideoCall] Ignoring duplicate call-request (state=${callStateRef.current})`);
+          return;
+        }
         syncCallState("incoming");
         onIncomingCall?.(payload.callerName ?? "");
+      })
+      .on("broadcast", { event: "call-accepted" }, () => {
+        // Fix 2: Callee acknowledged — mark so the repeat-ring loop stops
+        console.log("[VideoCall] Call accepted by remote party.");
+        callAcceptedRef.current = true;
       })
       .on("broadcast", { event: "call-ended" }, () => {
         console.log("[VideoCall] Incoming call-ended broadcast.");
@@ -278,12 +296,24 @@ export function useWebRTC({
         console.log("[VideoCall] Initiating call as:", myName);
         setError(null);
         syncCallState("calling");
+        callAcceptedRef.current = false;
 
-        // Notify the other party securely after channel is subscribed
+        // Fix 2: reduced to 2 retries (3 total sends). Loop stops early if
+        // callee sends a call-accepted ack OR if this side is no longer calling.
         let attempts = 0;
-        const maxAttempts = 5; // Send signaling multiple times to be safe
+        const maxAttempts = 2;
 
         const sendOffer = () => {
+          // Stop if accepted or call was ended/errored
+          if (callAcceptedRef.current) {
+            console.log("[VideoCall] call-accepted received — stopping ring loop.");
+            return;
+          }
+          const currentState = callStateRef.current;
+          if (currentState === "ended" || currentState === "error" || currentState === "idle") {
+            return;
+          }
+
           if (isSubscribedRef.current && channelRef.current) {
             console.log(
               `[VideoCall] Sending call-request broadcast (attempt ${attempts + 1})...`,
@@ -296,9 +326,10 @@ export function useWebRTC({
 
             if (attempts < maxAttempts) {
               attempts++;
-              setTimeout(sendOffer, 1000); // Re-send every second for a few seconds
+              setTimeout(sendOffer, 1500);
             }
           } else if (attempts < 50) {
+            // Not subscribed yet — wait and retry
             attempts++;
             setTimeout(sendOffer, 200);
           }
@@ -321,6 +352,14 @@ export function useWebRTC({
   const acceptCall = useCallback(async () => {
     try {
       syncCallState("connecting");
+      // Fix 2: Tell the caller to stop ringing immediately
+      if (isSubscribedRef.current && channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "call-accepted",
+          payload: {},
+        });
+      }
       await joinAndPublish();
     } catch (err) {
       const msg = describeCallError(err);
