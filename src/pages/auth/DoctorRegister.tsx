@@ -12,7 +12,6 @@ export function DoctorRegister() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
-  const [specialty, setSpecialty] = useState("");
   const [officeAddress, setOfficeAddress] = useState("");
   const [parish, setParish] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +48,6 @@ export function DoctorRegister() {
     if (
       !fullName ||
       !licenseNumber ||
-      !specialty ||
       !officeAddress ||
       !parish
     ) {
@@ -68,7 +66,6 @@ export function DoctorRegister() {
             role: "doctor",
             full_name: fullName,
             license_number: licenseNumber,
-            specialty,
             office_address: officeAddress,
             parish,
           },
@@ -173,24 +170,14 @@ export function DoctorRegister() {
               placeholder="doctor@example.com"
               required
             />
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Medical License #"
-                type="text"
-                value={licenseNumber}
-                onChange={(e) => setLicenseNumber(e.target.value)}
-                placeholder="MD-123456"
-                required
-              />
-              <Input
-                label="Specialty"
-                type="text"
-                value={specialty}
-                onChange={(e) => setSpecialty(e.target.value)}
-                placeholder="Dermatology"
-                required
-              />
-            </div>
+            <Input
+              label="Medical License #"
+              type="text"
+              value={licenseNumber}
+              onChange={(e) => setLicenseNumber(e.target.value)}
+              placeholder="MD-123456"
+              required
+            />
 
             <Input
               label="Office Address"

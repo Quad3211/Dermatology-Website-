@@ -13,7 +13,6 @@ export function DoctorSettings() {
   const [profile, setProfile] = useState<{
     full_name: string;
     license_number: string;
-    specialty: string;
     email: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,7 +31,7 @@ export function DoctorSettings() {
         // Also check profiles table for most up-to-date info
         const { data: profileData } = await supabase
           .from("profiles")
-          .select("full_name, license_number, specialty")
+          .select("full_name, license_number")
           .eq("id", user.id)
           .maybeSingle();
 
@@ -42,8 +41,6 @@ export function DoctorSettings() {
             profileData?.license_number ||
             metadata?.license_number ||
             "Not Verified",
-          specialty:
-            profileData?.specialty || metadata?.specialty || "Dermatology",
           email: user.email || "",
         });
       } catch (err) {
@@ -111,10 +108,10 @@ export function DoctorSettings() {
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
-                    Specialty / Designation
+                    Registered Email
                   </label>
-                  <div className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 text-slate-900 font-bold block">
-                    {profile?.specialty}
+                  <div className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 text-slate-600 font-medium block italic">
+                    {profile?.email}
                   </div>
                 </div>
               </div>
@@ -126,14 +123,6 @@ export function DoctorSettings() {
                   </label>
                   <div className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 text-slate-900 font-bold block">
                     {profile?.license_number}
-                  </div>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-400 uppercase tracking-widest px-1">
-                    Registered Email
-                  </label>
-                  <div className="w-full bg-slate-50 border-2 border-slate-50 rounded-2xl p-4 text-slate-600 font-medium block italic">
-                    {profile?.email}
                   </div>
                 </div>
               </div>
