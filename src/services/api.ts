@@ -139,6 +139,10 @@ export const api = {
     get: () => apiFetch<{ status: string; version: string }>("/health"),
   },
 
+  public: {
+    getDoctors: () => apiFetch<{ success: boolean; data: any[] }>("/public/doctors").then(res => res.data),
+  },
+
   uploads: {
     create: (payload: CreateUploadPayload) =>
       apiFetch<UploadResponse>("/uploads", {

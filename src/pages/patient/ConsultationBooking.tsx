@@ -6,6 +6,7 @@ import {
   Loader2,
   MessageSquare,
   UploadCloud,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -18,11 +19,13 @@ import {
 } from "../../components/core/Card";
 import { SecureTextChat } from "../../components/shared/SecureTextChat";
 import { supabase } from "../../config/supabase";
+import { api } from "../../services/api";
 import { cn } from "../../utils/cn";
 
 export function ConsultationBooking() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>("");
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBooked, setIsBooked] = useState(false);
@@ -63,6 +66,12 @@ export function ConsultationBooking() {
     },
   });
 
+  // fetch available doctors via backend
+  const { data: doctorsList } = useQuery({
+    queryKey: ["doctors-list"],
+    queryFn: () => api.public.getDoctors(),
+  });
+
   // week picker window
   const dates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date();
@@ -92,7 +101,7 @@ export function ConsultationBooking() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedDate || !selectedTime) return;
+    if (!selectedDate || !selectedTime || !selectedDoctorId) return;
     setIsSubmitting(true);
     setError(null);
 
@@ -106,6 +115,7 @@ export function ConsultationBooking() {
         .from("consultations")
         .insert({
           patient_id: user.id,
+          doctor_id: selectedDoctorId,
           analysis_id: latestUpload?.analysis?.id ?? null,
           status: "pending",
           urgency:
@@ -162,30 +172,13 @@ export function ConsultationBooking() {
               </p>
               <p className="text-primary-600 font-bold text-xl mt-1">
                 at {selectedTime && formatTime(selectedTime)}
-              </p>
-              <p className="text-slate-400 text-xs mt-4">
-                A doctor will confirm or adjust the time based on availability.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              {bookedConsultId && (
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto rounded-xl px-8"
-                  onClick={() => setIsChatOpen(true)}
-                >
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Open Messages
-                </Button>
-              )}
-              <Link to="/patient" className="w-full sm:w-auto">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="w-full rounded-xl px-8"
-                >
-                  Return to Dashboard
-                </Button>
+              </strong>
+              <br />A doctor will confirm or adjust the time based on
+              availability.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link to="/patient">
+                <Button variant="outline">Return to Dashboard</Button>
               </Link>
             </div>
           </CardContent>
@@ -314,71 +307,68 @@ export function ConsultationBooking() {
           </Card>
         </div>
 
-        {/* Right Column: Date and Time Picker */}
-        <div className="lg:col-span-7">
-          <Card className="rounded-[32px] border-slate-100 shadow-xl shadow-slate-200/40 overflow-hidden">
-            <div className="grid grid-cols-1 md:grid-cols-2">
-              {/* Calendar Section */}
-              <div className="p-8 border-r border-slate-100 bg-white">
-                <h3 className="flex items-center text-lg font-bold text-slate-900 mb-6">
-                  <div className="bg-primary-50 p-2 rounded-xl mr-3">
-                    <Calendar className="w-5 h-5 text-primary-600" />
-                  </div>
-                  Preferred Date
-                </h3>
-                <div className="space-y-3">
-                  {dates.map((d) => {
-                    const iso = d.toISOString().split("T")[0];
-                    const isSelected = selectedDate === iso;
-                    return (
-                      <button
-                        key={iso}
-                        onClick={() => setSelectedDate(iso)}
-                        className={cn(
-                          "w-full group relative flex items-center p-4 rounded-2xl border-2 transition-all duration-200 text-left overflow-hidden",
-                          isSelected
-                            ? "bg-primary-600 border-primary-600 text-white shadow-lg shadow-primary-200 ring-4 ring-primary-50"
-                            : "bg-white border-slate-50 text-slate-600 hover:border-primary-100 hover:bg-primary-50/30",
-                        )}
-                      >
-                        <div className="flex-1">
-                          <p
-                            className={cn(
-                              "text-xs font-bold uppercase tracking-widest mb-0.5",
-                              isSelected ? "text-white/80" : "text-slate-400",
-                            )}
-                          >
-                            {d.toLocaleDateString("en-US", {
-                              weekday: "short",
-                            })}
-                          </p>
-                          <p className="text-base font-extrabold">
-                            {d.toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </p>
-                        </div>
-                        <div
-                          className={cn(
-                            "w-6 h-6 rounded-full flex items-center justify-center transition-all",
-                            isSelected
-                              ? "bg-white/20"
-                              : "bg-slate-50 text-slate-300 group-hover:bg-primary-100 group-hover:text-primary-600",
-                          )}
-                        >
-                          <CheckCircle2
-                            className={cn(
-                              "w-4 h-4",
-                              isSelected ? "opacity-100" : "opacity-0",
-                            )}
-                          />
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Doctor Selection */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <Users className="w-5 h-5 mr-3 text-primary-600" />
+              Select Dermatologist
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <select
+              value={selectedDoctorId}
+              onChange={(e) => setSelectedDoctorId(e.target.value)}
+              className="w-full border border-surface-border rounded-lg p-3 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-primary-300"
+              required
+            >
+              <option value="" disabled>Choose a doctor...</option>
+              {doctorsList?.map(doc => (
+                <option key={doc.id} value={doc.id}>
+                  Dr. {doc.full_name} {doc.parish ? `- Office located in ${doc.parish}` : ''}
+                </option>
+              ))}
+            </select>
+          </CardContent>
+        </Card>
+
+        {/* calendar input */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center text-lg">
+              <Calendar className="w-5 h-5 mr-3 text-primary-600" />
+              Preferred Date
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {dates.map((d) => {
+              const iso = d.toISOString().split("T")[0];
+              return (
+                <button
+                  key={iso}
+                  onClick={() => setSelectedDate(iso)}
+                  className={cn(
+                    "w-full flex items-center justify-between p-3 rounded-lg border transition-colors cursor-pointer text-sm",
+                    selectedDate === iso
+                      ? "bg-primary-50 border-primary-500 text-primary-700 font-medium"
+                      : "border-surface-border text-slate-700 hover:bg-slate-50",
+                  )}
+                >
+                  <span>
+                    {d.toLocaleDateString("en-US", { weekday: "long" })}
+                  </span>
+                  <span className="opacity-70">
+                    {d.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </span>
+                </button>
+              );
+            })}
+          </CardContent>
+        </Card>
 
               {/* Time Slots Section */}
               <div
@@ -434,24 +424,26 @@ export function ConsultationBooking() {
             </div>
           </Card>
 
-          <div className="flex justify-end pt-8">
-            <Button
-              size="lg"
-              className="px-12 py-7 rounded-2xl text-lg font-bold shadow-xl shadow-primary-200 transition-all hover:scale-[1.02] active:scale-95 disabled:hover:scale-100 disabled:opacity-50"
-              disabled={!selectedDate || !selectedTime || isSubmitting}
-              onClick={handleSubmit}
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                "Request Consultation"
-              )}
-            </Button>
-          </div>
-        </div>
+      <div className="flex justify-end pt-2">
+        <Button
+          size="lg"
+          disabled={
+            !selectedDate ||
+            !selectedTime ||
+            !selectedDoctorId ||
+            isSubmitting
+          }
+          onClick={handleSubmit}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Submitting…
+            </>
+          ) : (
+            "Request Consultation"
+          )}
+        </Button>
       </div>
     </div>
   );

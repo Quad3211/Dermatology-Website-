@@ -13,7 +13,15 @@ export function DoctorRegister() {
   const [fullName, setFullName] = useState("");
   const [licenseNumber, setLicenseNumber] = useState("");
   const [specialty, setSpecialty] = useState("");
+  const [officeAddress, setOfficeAddress] = useState("");
+  const [parish, setParish] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const JAMAICA_PARISHES = [
+    "Clarendon", "Hanover", "Kingston", "Manchester", "Portland",
+    "St. Andrew", "St. Ann", "St. Catherine", "St. Elizabeth",
+    "St. James", "St. Mary", "St. Thomas", "Trelawny", "Westmoreland"
+  ];
   const [error, setError] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
@@ -26,8 +34,8 @@ export function DoctorRegister() {
     if (password !== confirmPassword) {
       return setError("Passwords do not match");
     }
-    if (!fullName || !licenseNumber || !specialty) {
-      return setError("Please fill in all professional details");
+    if (!fullName || !licenseNumber || !specialty || !officeAddress || !parish) {
+      return setError("Please fill in all professional details and address");
     }
 
     setIsLoading(true);
@@ -43,6 +51,8 @@ export function DoctorRegister() {
             full_name: fullName,
             license_number: licenseNumber,
             specialty,
+            office_address: officeAddress,
+            parish,
           },
         },
       });
@@ -161,6 +171,32 @@ export function DoctorRegister() {
                 placeholder="Dermatology"
                 required
               />
+            </div>
+            
+            <Input
+              label="Office Address"
+              type="text"
+              value={officeAddress}
+              onChange={(e) => setOfficeAddress(e.target.value)}
+              placeholder="123 Health Ave, Suite 4"
+              required
+            />
+            
+            <div className="space-y-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1">
+                Parish
+              </label>
+              <select
+                value={parish}
+                onChange={(e) => setParish(e.target.value)}
+                required
+                className="w-full h-11 px-4 text-base bg-slate-50 border border-slate-200 rounded-xl transition-all outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 hover:border-slate-300 text-slate-900"
+              >
+                <option value="" disabled>Select Parish</option>
+                {JAMAICA_PARISHES.map(p => (
+                  <option key={p} value={p}>{p}</option>
+                ))}
+              </select>
             </div>
             <Input
               label="Password"

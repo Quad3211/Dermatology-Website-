@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import {
   Activity,
   AlertTriangle,
-  ArrowRight,
   CheckCircle2,
   Clock,
   Heart,
@@ -93,14 +92,6 @@ export function LandingPage() {
                 variants={fadeInUp}
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <Link to="/scan" className="w-full sm:w-auto">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto hover:scale-105 transition-transform shadow-xl hover:shadow-primary-500/20 py-6 px-8 text-lg"
-                  >
-                    Start Screening <ArrowRight className="ml-2 w-5 h-5" />
-                  </Button>
-                </Link>
                 <a href="#how-it-works" className="w-full sm:w-auto">
                   <Button
                     variant="outline"
@@ -542,14 +533,14 @@ export function LandingPage() {
             ready to review your case if the AI recommends it.
           </motion.p>
           <motion.div variants={fadeInUp}>
-            <Link to="/scan">
+            <a href="#how-it-works">
               <Button
                 size="lg"
                 className="bg-white text-primary-900 hover:bg-slate-50 border-none shadow-2xl text-lg px-10 py-7 rounded-full hover:scale-105 transition-transform font-bold"
               >
-                Start Screening
+                Learn More
               </Button>
-            </Link>
+            </a>
           </motion.div>
           <motion.p
             variants={fadeInUp}

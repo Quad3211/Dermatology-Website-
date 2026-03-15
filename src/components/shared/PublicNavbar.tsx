@@ -101,13 +101,6 @@ export function PublicNavbar() {
               </div>
               <div className="space-y-2">
                 <Link
-                  to="/scan"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"
-                >
-                  Start Free Screening
-                </Link>
-                <Link
                   to="/about"
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 text-base font-semibold text-slate-700 hover:bg-slate-50"

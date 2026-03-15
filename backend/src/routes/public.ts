@@ -5,6 +5,7 @@ import { z } from "zod";
 import { HttpError } from "../middleware/errorHandler.js";
 import { analyzeSkinWithGemini } from "../services/geminiService.js";
 import { applySafetyGate } from "../services/medicalSafety.js";
+import { supabase } from "../services/supabase.js";
 
 export const publicRouter = Router();
 
@@ -78,3 +79,25 @@ publicRouter.post(
     }
   },
 );
+
+// list active doctors
+publicRouter.get("/doctors", async (req, res, next) => {
+  try {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, full_name, parish, specialty, office_address")
+      .eq("role", "doctor")
+      .order("full_name");
+
+    if (error) {
+      throw new HttpError(500, "DATABASE_ERROR", error.message);
+    }
+
+    res.json({
+      success: true,
+      data: data || [],
+    });
+  } catch (err) {
+    next(err);
+  }
+});

@@ -50,7 +50,7 @@ const analysisSchema: any = {
     summary: {
       type: SchemaType.STRING,
       description:
-        "A text explanation. If a disease is detected, describe it and why it looks concerning. IF HEALTHY/NO DISEASE is visible, you MUST provide customized skincare tips based on the appearance of the skin (e.g., hydration, sun protection, routine advice).",
+        "A text explanation. If a disease is detected, describe it and why it looks concerning, AND suggest treatment options (including OTC or natural remedies regardless of risk level). IF HEALTHY/NO DISEASE is visible, you MUST provide customized skincare tips based on the appearance of the skin (e.g., hydration, sun protection, routine advice).",
     },
     bounding_box: {
       type: SchemaType.OBJECT,
@@ -105,6 +105,7 @@ export async function analyzeSkinWithGemini(
     "If you detect a disease, classify it (e.g., melanoma, basal_cell_carcinoma, etc.), assign a risk level, " +
     "severity score, and explain your findings in the summary. " +
     "CRITICAL: If a disease/lesion is detected, you MUST provide its tightest bounding box coordinates in the 'bounding_box' field, scaled from 0 to 1000 where [0,0] is top-left and [1000,1000] is bottom-right. " +
+    "You MUST also suggest possible treatment options for all risk levels, including over-the-counter (OTC) products or natural remedies if appropriate. " +
     "If you DO NOT detect any visible disease, classify it as 'healthy_skin', set risk to LOW, severity to 0, omit the bounding box entirely, " +
     "and YOU MUST use the 'summary' field to provide helpful, personalized skincare tips based on the skin type, " +
     "texture, or context in the image (e.g., 'Your skin looks well hydrated. To maintain it, consider...'). " +
