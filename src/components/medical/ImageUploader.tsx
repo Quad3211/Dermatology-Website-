@@ -21,6 +21,7 @@ export function ImageUploader({ onUpload, isUploading }: ImageUploaderProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState("");
   const [useCamera, setUseCamera] = useState(false);
+  const [dpaConsent, setDpaConsent] = useState(false);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -51,6 +52,7 @@ export function ImageUploader({ onUpload, isUploading }: ImageUploaderProps) {
         setError(validationError);
       } else {
         setError("");
+        setDpaConsent(false);
         setSelectedFile(file);
       }
     }
@@ -65,6 +67,7 @@ export function ImageUploader({ onUpload, isUploading }: ImageUploaderProps) {
         setError(validationError);
       } else {
         setError("");
+        setDpaConsent(false);
         setSelectedFile(file);
       }
     }
@@ -72,6 +75,11 @@ export function ImageUploader({ onUpload, isUploading }: ImageUploaderProps) {
 
   const submitUpload = async () => {
     if (!selectedFile) return;
+    if (!dpaConsent) {
+      setError("Please confirm your consent to process this medical image before analyzing.");
+      return;
+    }
+    setError("");
     try {
       await onUpload(selectedFile);
     } catch (err: unknown) {
@@ -163,6 +171,21 @@ export function ImageUploader({ onUpload, isUploading }: ImageUploaderProps) {
                 <X className="h-5 w-5" />
               </button>
             )}
+          </div>
+
+          <div className="mt-4 flex items-start bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm">
+            <div className="flex items-center h-5 mt-1">
+              <input
+                id="upload-dpa-consent"
+                type="checkbox"
+                checked={dpaConsent}
+                onChange={(e) => setDpaConsent(e.target.checked)}
+                className="w-5 h-5 border border-slate-300 rounded bg-white focus:ring-3 focus:ring-primary-300 text-primary-600 appearance-none checked:bg-primary-600 checked:border-transparent transition-colors cursor-pointer relative"
+              />
+            </div>
+            <label htmlFor="upload-dpa-consent" className="ml-3 text-sm text-slate-700 font-medium leading-relaxed cursor-pointer">
+              I explicitly consent to this specific image and associated demographic data being processed by AI and reviewed by Jamaican medical professionals in accordance with the Data Protection Act.
+            </label>
           </div>
 
           <div className="mt-6 flex justify-end space-x-3">

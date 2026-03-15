@@ -205,16 +205,33 @@ export function Dashboard() {
           <CardHeader>
             <CardTitle className="text-slate-800 flex items-center">
               <ShieldCheck className="h-5 w-5 text-status-safe mr-2" />
-              Privacy Status
+              Privacy & Data Control
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-sm text-slate-600 mb-4">
-              Your images are securely stored and will be automatically purged
-              after 72 hours per your medical profile settings.
-            </p>
+          <CardContent className="flex flex-col h-[calc(100%-4rem)] justify-between">
+            <div>
+              <p className="text-sm text-slate-600 mb-4">
+                Your images are securely encrypted and automatically purged after 72
+                hours.
+              </p>
+              <div className="bg-slate-50 border border-slate-100 rounded-lg p-3 mb-4">
+                <p className="text-xs font-semibold text-slate-700 mb-1">
+                  Jamaica DPA Compliance
+                </p>
+                <p className="text-xs text-slate-500">
+                  You have the right to request the complete erasure of your account
+                  and all associated health data.
+                </p>
+                <a 
+                  href="mailto:privacy@skinhealth.com?subject=DPA Right to Erasure Request"
+                  className="mt-2 inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md transition-colors"
+                >
+                  Request Full Data Deletion
+                </a>
+              </div>
+            </div>
             <div className="text-xs text-slate-400 border-t border-slate-100 pt-4 cursor-default">
-              System is end-to-end encrypted.
+              End-to-End Encrypted System
             </div>
           </CardContent>
         </Card>
