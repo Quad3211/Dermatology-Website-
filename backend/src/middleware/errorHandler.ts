@@ -26,7 +26,7 @@ export function errorHandler(
   res.status(status).json({
     error: {
       code,
-      message: status === 500 ? "An unexpected error occurred." : err.message,
+      message: err.message || "An unexpected error occurred.",
       timestamp: new Date().toISOString(),
       ...(isDev && status === 500 ? { stack: err.stack } : {}),
     },

@@ -153,11 +153,20 @@ analysisRouter.get(
       }
 
       // get image link
-      const storagePath = (analysis.uploads as { storage_path: string })
-        .storage_path;
-      const { data: signedData } = await supabase.storage
-        .from("skin-images")
-        .createSignedUrl(storagePath, 3600);
+      const uploadData = Array.isArray(analysis.uploads)
+        ? analysis.uploads[0]
+        : analysis.uploads;
+
+      const storagePath = (uploadData as { storage_path: string })
+        ?.storage_path;
+
+      let imageUrl = null;
+      if (storagePath) {
+        const { data: signedData } = await supabase.storage
+          .from("skin-images")
+          .createSignedUrl(storagePath, 3600);
+        imageUrl = signedData?.signedUrl ?? null;
+      }
 
       // prune raw db return
       const { uploads: _u, ...result } = analysis as Record<string, unknown>;
@@ -165,7 +174,7 @@ analysisRouter.get(
 
       res.json({
         ...result,
-        imageUrl: signedData?.signedUrl ?? null,
+        imageUrl,
         disclaimer: MEDICAL_DISCLAIMER,
       });
     } catch (err) {
