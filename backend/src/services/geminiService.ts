@@ -87,10 +87,17 @@ const analysisSchema: any = {
   ],
 };
 
-// Use the current GA stable model
-const model = genAI.getGenerativeModel(
-  { model: "gemini-1.5-flash" },
-  { apiVersion: "v1" },
+// Force v1beta endpoint — gemini-1.5 / 2.x models are only available there, not the stable v1
+// See: https://ai.google.dev/api/all-methods
+const modelInstance = genAI.getGenerativeModel(
+  {
+    model: "gemini-2.0-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: analysisSchema,
+    },
+  },
+  { apiVersion: "v1beta" }
 );
 
 export async function analyzeSkinWithGemini(
@@ -110,7 +117,7 @@ export async function analyzeSkinWithGemini(
     `Schema: ${JSON.stringify(analysisSchema.properties)}`;
 
   try {
-    const result = await model.generateContent([
+    const result = await modelInstance.generateContent([
       {
         inlineData: {
           data: cleanBase64,
