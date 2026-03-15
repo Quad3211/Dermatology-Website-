@@ -29,12 +29,19 @@ app.use(
 // setup cors
 const allowedOrigins = (
   process.env.ALLOWED_ORIGIN ?? "http://localhost:5173"
-).split(",");
+).split(",").map(o => o.trim());
+
 app.use(
   cors({
     origin: (origin, cb) => {
-      // proxy support
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+      // allow serverless / same-origin requests with no origin header
+      if (!origin) return cb(null, true);
+      // exact match or vercel preview URLs (*.vercel.app)
+      const isAllowed =
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/[a-zA-Z0-9-]+-[a-zA-Z0-9]+\.vercel\.app$/.test(origin) ||
+        allowedOrigins.some(o => origin.startsWith(o));
+      if (isAllowed) return cb(null, true);
       cb(new Error("Not allowed by CORS"));
     },
     methods: ["GET", "POST", "PATCH", "DELETE"],
