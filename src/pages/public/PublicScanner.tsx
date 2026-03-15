@@ -79,9 +79,9 @@ export function PublicScanner() {
       reader.readAsDataURL(file);
       const base64Image = await base64Promise;
 
-      // call api
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
-      const res = await fetch(`${apiUrl}/api/v1/public/scan`, {
+      // call api — VITE_API_BASE_URL is proxied in dev, and set to the deployed backend URL in production
+      const apiBase = import.meta.env.VITE_API_BASE_URL || "/api/v1";
+      const res = await fetch(`${apiBase}/public/scan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
