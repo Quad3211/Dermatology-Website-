@@ -158,7 +158,7 @@ export function PublicScanner() {
             <div className="flex items-center gap-3">
               <ScanIcon className="w-6 h-6 text-primary-400" />
               <span className="font-bold tracking-wide">
-                SkinHealth Engine v2.1
+                Dermify Engine v2.1
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1 bg-white/10 rounded-full border border-white/20">

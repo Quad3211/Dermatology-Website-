@@ -223,7 +223,7 @@ export function Dashboard() {
                   and all associated health data.
                 </p>
                 <a 
-                  href="mailto:privacy@skinhealth.com?subject=DPA Right to Erasure Request"
+                  href="mailto:privacy@dermify.com?subject=DPA Right to Erasure Request"
                   className="mt-2 inline-flex items-center justify-center w-full px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-md transition-colors"
                 >
                   Request Full Data Deletion

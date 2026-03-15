@@ -266,13 +266,13 @@ export function LandingPage() {
             <motion.div variants={fadeInUp} className="lg:w-1/2">
               <div className="inline-flex items-center space-x-2 bg-emerald-100 text-emerald-800 px-3 py-1.5 rounded-full text-sm font-semibold mb-6">
                 <ShieldPlus className="w-4 h-4" />
-                <span>The SkinHealth Solution</span>
+                <span>The Dermify Solution</span>
               </div>
               <h2 className="text-3xl lg:text-4xl font-extrabold text-slate-900 mb-6 tracking-tight">
                 A Safer Way to Get a Second Opinion Before the Waiting Room
               </h2>
               <p className="text-lg text-slate-700 font-medium mb-8 leading-relaxed">
-                SkinHealth combines AI-assisted image screening with access to
+                Dermify combines AI-assisted image screening with access to
                 real, licensed dermatologists — so you can make an informed
                 decision about whether and how urgently to seek care.
               </p>
@@ -368,7 +368,7 @@ export function LandingPage() {
               variants={fadeInUp}
               className="text-3xl lg:text-5xl font-extrabold mb-6 tracking-tight"
             >
-              How SkinHealth Works
+              How Dermify Works
             </motion.h2>
             <motion.p
               variants={fadeInUp}
@@ -571,7 +571,7 @@ export function LandingPage() {
             <div className="flex items-center space-x-2">
               <ShieldPlus className="h-8 w-8 text-primary-500" />
               <span className="text-2xl font-bold tracking-tight text-white">
-                SkinHealth
+                Dermify
               </span>
             </div>
 
@@ -599,7 +599,7 @@ export function LandingPage() {
               Important Medical Disclaimer
             </p>
             <p className="font-medium text-slate-400">
-              SkinHealth provides AI-assisted triage screening and educational
+              Dermify provides AI-assisted triage screening and educational
               guidance only. It does{" "}
               <strong className="text-slate-300">
                 not provide medical diagnoses
@@ -614,7 +614,7 @@ export function LandingPage() {
               emergency department immediately.
             </p>
             <p className="mt-8">
-              &copy; {new Date().getFullYear()} SkinHealth Ltd. All rights
+              &copy; {new Date().getFullYear()} Dermify Ltd. All rights
               reserved.
             </p>
           </div>

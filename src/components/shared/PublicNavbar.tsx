@@ -56,7 +56,7 @@ export function PublicNavbar() {
               <ShieldPlus className="h-6 w-6 text-primary-600" />
             </div>
             <span className="text-xl font-bold tracking-tight text-slate-900">
-              SkinHealth
+              Dermify
             </span>
           </Link>
           <div className="hidden sm:flex items-center space-x-4">

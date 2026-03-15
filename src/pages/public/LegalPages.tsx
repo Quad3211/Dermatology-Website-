@@ -27,7 +27,7 @@ export function LegalPage({
       </div>
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-200">
         <Link to="/" className="hover:text-primary-500 transition-colors">
-          ← Back to SkinHealth
+          ← Back to Dermify
         </Link>
       </footer>
     </div>
@@ -41,7 +41,7 @@ export function PrivacyPolicy() {
 
       <h3>Our Commitment to Your Privacy</h3>
       <p>
-        At SkinHealth, we understand that the information you share with us —
+        At Dermify, we understand that the information you share with us —
         particularly images of your skin and related health concerns — is among
         the most sensitive data you could provide. We treat it accordingly. This
         policy explains clearly what we collect, how it is used, and how it is
@@ -128,7 +128,7 @@ export function PrivacyPolicy() {
         You have the right to request a copy of your data, correct inaccuracies,
         or request deletion of your account and associated records at any time.
         To exercise these rights, contact us at{" "}
-        <strong>privacy@skinhealth.example.com</strong>. We respond to all
+        <strong>privacy@dermify.example.com</strong>. We respond to all
         privacy requests within 14 business days.
       </p>
 
@@ -157,7 +157,7 @@ export function MedicalDisclaimer() {
 
       <h3>This Platform Is a Triage Tool — Not a Diagnosis</h3>
       <p>
-        SkinHealth provides AI-assisted visual screening of skin images to help
+        Dermify provides AI-assisted visual screening of skin images to help
         users understand the approximate priority level of their concern. This
         is fundamentally different from a clinical medical diagnosis. The output
         of our AI is a <strong>preliminary triage assessment</strong> — a tool
@@ -165,7 +165,7 @@ export function MedicalDisclaimer() {
         care.
       </p>
       <p>
-        The AI screening report produced by SkinHealth is <strong>NOT</strong> a
+        The AI screening report produced by Dermify is <strong>NOT</strong> a
         substitute for, and should never be treated as equivalent to, a
         diagnosis, prognosis, or treatment recommendation from a qualified,
         licensed healthcare provider.
@@ -203,7 +203,7 @@ export function MedicalDisclaimer() {
 
       <h3>No Prescriptions or Treatment Recommendations</h3>
       <p>
-        SkinHealth does not prescribe medications, recommend treatments, or
+        Dermify does not prescribe medications, recommend treatments, or
         provide any form of clinical intervention. Doctor consultations
         facilitated through this platform are for discussion and triage support
         only. Any treatment decisions are made solely by the licensed doctor in
@@ -228,14 +228,14 @@ export function TermsOfUse() {
 
       <h3>1. Acceptance of These Terms</h3>
       <p>
-        By creating an account or using any part of the SkinHealth platform, you
+        By creating an account or using any part of the Dermify platform, you
         confirm that you have read, understood, and agree to these Terms of Use.
         If you do not agree, you must not use the platform.
       </p>
 
       <h3>2. Nature of the Service</h3>
       <p>
-        SkinHealth provides AI-assisted skin image screening and a platform to
+        Dermify provides AI-assisted skin image screening and a platform to
         facilitate consultations with licensed dermatologists. It is not a
         medical practice, it does not employ physicians directly, and it does
         not provide clinical diagnoses or treatment. All screening results are
@@ -290,13 +290,13 @@ export function TermsOfUse() {
       <h3>7. Intellectual Property</h3>
       <p>
         All content, branding, AI models, and underlying software on this
-        platform are the intellectual property of SkinHealth Ltd. and may not be
+        platform are the intellectual property of Dermify Ltd. and may not be
         reproduced, copied, or distributed without express written permission.
       </p>
 
       <h3>8. Limitation of Liability</h3>
       <p>
-        To the fullest extent permitted by law, SkinHealth Ltd. shall not be
+        To the fullest extent permitted by law, Dermify Ltd. shall not be
         liable for any direct, indirect, or consequential harm arising from
         reliance on the AI screening output, technical errors, or any failure of
         the platform outside of our direct control.

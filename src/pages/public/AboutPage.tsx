@@ -15,7 +15,7 @@ export function AboutPage() {
             </div>
           </div>
           <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">
-            About SkinHealth
+            About Dermify
           </h1>
           <p className="text-xl text-slate-600 leading-relaxed font-medium">
             We are building technology that makes it faster and less stressful
@@ -38,7 +38,7 @@ export function AboutPage() {
             needed sooner.
           </p>
           <p className="text-slate-700 leading-relaxed">
-            SkinHealth bridges that gap. Using rigorous AI-assisted screening,
+            Dermify bridges that gap. Using rigorous AI-assisted screening,
             we help patients understand the likely priority level of their
             concern so they can make an informed decision about next steps — and
             connect with a real, licensed dermatologist when follow-up care is
@@ -85,7 +85,7 @@ export function AboutPage() {
             </h3>
             <p className="text-slate-600 text-sm leading-relaxed">
               Access to quick dermatology input should not depend on your
-              geography or income. SkinHealth is free to use for screening, with
+              geography or income. Dermify is free to use for screening, with
               the goal of helping people in under-served communities get faster
               answers.
             </p>
@@ -96,7 +96,7 @@ export function AboutPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-8 mb-12">
           <h2 className="text-xl font-extrabold text-amber-900 mb-3 flex items-center gap-2">
             <Lock className="w-5 h-5" />
-            What SkinHealth Is — and Is Not
+            What Dermify Is — and Is Not
           </h2>
           <ul className="space-y-2 text-amber-800 text-sm leading-relaxed">
             <li>
@@ -142,7 +142,7 @@ export function AboutPage() {
 
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-200">
         <Link to="/" className="hover:text-primary-500 transition-colors">
-          ← Back to SkinHealth
+          ← Back to Dermify
         </Link>
       </footer>
     </div>

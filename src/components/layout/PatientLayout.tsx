@@ -91,7 +91,7 @@ export function PatientLayout() {
                   to="/"
                   className="text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors"
                 >
-                  SkinHealth
+                  Dermify
                 </Link>
               </div>
               <div className="hidden sm:-my-px sm:ml-8 sm:flex sm:space-x-8">

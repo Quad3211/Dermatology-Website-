@@ -64,7 +64,7 @@ export function DoctorSettings() {
         profile?.license_number +
         "\n\nProposed Changes:\n[Enter changes here]",
     );
-    window.location.href = `mailto:support@skinhealth.ai?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:support@dermify.ai?subject=${subject}&body=${body}`;
   };
 
   if (isLoading) {

@@ -109,7 +109,7 @@ export function DoctorLayout() {
                   to="/"
                   className="text-xl font-bold text-primary-600 hover:text-primary-700 transition-colors flex items-center"
                 >
-                  SkinHealth{" "}
+                  Dermify{" "}
                   <span className="text-sm font-normal text-slate-500 ml-2 border-l pl-2 border-slate-300">
                     Doctor Portal
                   </span>

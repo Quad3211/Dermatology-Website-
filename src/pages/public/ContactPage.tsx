@@ -9,7 +9,7 @@ export function ContactPage() {
       <PublicNavbar />
       <div className="flex-1 max-w-4xl mx-auto px-4 sm:px-6 py-12 w-full">
         <h1 className="text-4xl font-extrabold text-slate-900 mb-4 text-center">
-          Contact SkinHealth
+          Contact Dermify
         </h1>
         <p className="text-lg text-slate-600 mb-4 text-center max-w-2xl mx-auto">
           Our support team is available to assist with platform access,
@@ -94,7 +94,7 @@ export function ContactPage() {
               </div>
               <div>
                 <h3 className="font-bold text-slate-900">Email Support</h3>
-                <p className="text-slate-600">support@skinhealth.example.com</p>
+                <p className="text-slate-600">support@dermify.example.com</p>
                 <p className="text-sm text-slate-400 mt-1">
                   Response within 1–2 business days
                 </p>
@@ -132,7 +132,7 @@ export function ContactPage() {
                 For data access, deletion requests, or privacy concerns under
                 HIPAA or GDPR, please email{" "}
                 <span className="text-primary-600 font-medium">
-                  privacy@skinhealth.example.com
+                  privacy@dermify.example.com
                 </span>{" "}
                 directly. We aim to respond to all privacy requests within 14
                 business days.
@@ -144,7 +144,7 @@ export function ContactPage() {
 
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-200">
         <Link to="/" className="hover:text-primary-500 transition-colors">
-          ← Back to SkinHealth
+          ← Back to Dermify
         </Link>
       </footer>
     </div>
