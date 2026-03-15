@@ -125,10 +125,22 @@ export function LandingPage() {
             {/* desktop visual gap */}
             <div className="hidden lg:block relative h-full">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, rotate: 2 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                transition={{ duration: 1, delay: 0.3 }}
-                className="absolute right-0 top-1/2 -translate-y-1/2 bg-white p-6 rounded-[2rem] shadow-2xl border border-slate-100 max-w-sm w-full backdrop-blur-md bg-white/90"
+                initial={{ opacity: 0, scale: 0.95, rotate: 2, y: 0 }}
+                animate={{
+                  opacity: 1,
+                  scale: 1,
+                  rotate: 0,
+                  y: [0, -15, 0],
+                }}
+                transition={{
+                  duration: 5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  opacity: { duration: 1, delay: 0.3 },
+                  scale: { duration: 1, delay: 0.3 },
+                  rotate: { duration: 1, delay: 0.3 },
+                }}
+                className="absolute right-0 top-12 lg:top-20 bg-white p-6 rounded-[2rem] shadow-2xl border border-slate-100 max-w-sm w-full backdrop-blur-md bg-white/90"
               >
                 <div className="space-y-6">
                   <div className="flex items-center space-x-3 border-b border-slate-100 pb-4">
@@ -146,7 +158,7 @@ export function LandingPage() {
                   </div>
                   <div className="aspect-video bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden">
                     <Search className="w-8 h-8 text-primary-300 mb-2 absolute" />
-                    <div className="h-1 w-full bg-primary-400 absolute top-1/2 left-0 shadow-[0_0_15px_rgba(14,165,233,0.5)] animate-scan" />
+                    <div className="h-[2px] w-full bg-primary-400 absolute left-0 shadow-[0_0_15px_rgba(14,165,233,0.8)] animate-scan-line z-20" />
                   </div>
                   <div className="space-y-3">
                     <div className="bg-slate-50 p-3 rounded-lg flex items-center justify-between border border-slate-100">
