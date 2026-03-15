@@ -146,15 +146,26 @@ export async function analyzeSkinWithGemini(
       );
     }
   } catch (error: unknown) {
-    const err = error as { status?: number; message?: string };
-    console.error("[Gemini Service] Error during API call:", error);
+    // Re-throw our own HttpErrors immediately — don't re-wrap them
+    if (error instanceof HttpError) throw error;
 
-    // format rate limit errs
-    if (
+    const err = error as { status?: number; statusCode?: number; message?: string; toString?: () => string };
+    // Log the raw error in full so we can see what Google actually sent
+    console.error("[Gemini Service] Raw API error:", JSON.stringify({
+      status: err.status,
+      statusCode: err.statusCode,
+      message: err.message,
+      full: String(error),
+    }));
+
+    // Detect rate limit: only on explicit 429 status or exact quota messages
+    const isRateLimit =
       err.status === 429 ||
-      err.message?.includes("429") ||
-      err.message?.includes("Quota exceeded")
-    ) {
+      err.statusCode === 429 ||
+      err.message?.toLowerCase().includes("quota exceeded") ||
+      err.message?.toLowerCase().includes("resource_exhausted");
+
+    if (isRateLimit) {
       throw new HttpError(
         429,
         "RATE_LIMIT_EXCEEDED",
@@ -162,7 +173,7 @@ export async function analyzeSkinWithGemini(
       );
     }
 
-    // handle standard errs
+    // Pass the real Google error message through so we can diagnose it
     const detailedMessage = err.message ? `: ${err.message}` : "";
     throw new HttpError(
       500,
