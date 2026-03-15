@@ -1,16 +1,20 @@
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  Activity,
-  AlertCircle,
   BookOpen,
-  ChevronDown,
-  Info,
+  Calendar,
+  ChevronRight,
+  Filter,
+  Lightbulb,
   Search,
-  ShieldCheck,
-  Sun,
+  Sparkles,
+  X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "../../components/core/Button";
 import { Card, CardContent } from "../../components/core/Card";
+import { ABCDEModule } from "../../components/education/ABCDEModule";
+import { VisualSymptomGallery } from "../../components/education/VisualSymptomGallery";
+import { supabase } from "../../config/supabase";
 
 const categories = [
   "All",
@@ -20,278 +24,345 @@ const categories = [
   "Procedures",
 ];
 
-const resources = [
+const articles = [
   {
     id: 1,
     category: "Skin Cancer",
-    title: "Understanding Melanoma (The ABCDEs)",
+    title: "Understanding Melanoma",
     description:
-      "Melanoma is the most dangerous form of skin cancer. Learn the ABCDEs for early detection.",
+      "Learn about the most dangerous form of skin cancer and how to detect it early.",
     content:
-      "The ABCDE rule is a helpful guide for catching melanoma early:\n\n• Asymmetry: One half of the mole does not match the other.\n• Border: The edges are irregular, ragged, notched, or blurred.\n• Color: The color is not the same all over and may include different shades of brown or black, or sometimes with patches of pink, red, white, or blue.\n• Diameter: The spot is larger than 6 millimeters across (about the size of a pencil eraser), although melanomas can sometimes be smaller than this.\n• Evolving: The mole is changing in size, shape, or color.\n\nIf you notice any of these signs, have it evaluated by a dermatologist immediately.",
-    icon: AlertCircle,
-    color: "text-red-600",
-    bgColor: "bg-red-100",
+      "Melanoma is the most serious type of skin cancer. It develops in the cells (melanocytes) that produce melanin — the pigment that gives your skin its color. Early detection is key to survival. The ABCDE rule is a helpful guide: Asymmetry, Border, Color, Diameter, and Evolving. Any lesion that grows, changes shape, or bleeds should be examined by a dermatologist immediately.",
+    tags: ["High Risk", "Clinical"],
   },
   {
     id: 2,
-    category: "Skin Cancer",
-    title: "Basal & Squamous Cell Carcinomas",
+    category: "Daily Prevention",
+    title: "The Ultimate Guide to SPF",
     description:
-      "The most common and highly treatable forms of skin cancer. Identify the warning signs.",
+      "Everything you need to know about broad-spectrum protection and daily UV habits.",
     content:
-      "Basal Cell Carcinoma (BCC) often appears as a slightly transparent bump on the skin, though it can take other forms. It occurs most often on areas of the skin that are exposed to the sun.\n\nSquamous Cell Carcinoma (SCC) usually appears as a firm, red nodule or a flat lesion with a scaly, crusted surface. Both are highly treatable when caught early but can cause significant local tissue damage if ignored. Prevention includes daily sun protection.",
-    icon: Activity,
-    color: "text-orange-600",
-    bgColor: "bg-orange-100",
+      "Sunscreen is one of your best defenses against skin cancer and premature aging. Look for 'broad-spectrum' on the label to ensure protection against both UVA and UVB rays. You should apply at least SPF 30 every single day, including cloudy days, as UV rays penetrate through cloud cover. Reapply every two hours when outdoors.",
+    tags: ["Prevention", "Daily"],
   },
   {
     id: 3,
-    category: "Daily Prevention",
-    title: "Sun Safety & Daily UV Protection",
+    category: "Common Conditions",
+    title: "Managing Adult Acne",
     description:
-      "Daily habits to protect your skin from harmful UV radiation and prevent premature aging.",
+      "Evidence-based treatments for persistent adult acne and hormonal breakouts.",
     content:
-      "Sun protection is the foundation of skin health:\n\n1. Sunscreen: Apply a broad-spectrum, water-resistant sunscreen with an SPF of 30 or higher every day, even when it's cloudy.\n2. Reapplication: Reapply sunscreen every two hours, or immediately after swimming or sweating.\n3. Cover Up: Wear UPF (Ultraviolet Protection Factor) clothing, wide-brimmed hats, and UV-blocking sunglasses.\n4. Seek Shade: Avoid direct sun exposure during peak hours, typically between 10 AM and 4 PM.\n\nConsistent sun protection dramatically reduces your risk of all skin cancers and protects against photoaging.",
-    icon: Sun,
-    color: "text-amber-500",
-    bgColor: "bg-amber-100",
+      "Adult acne is often caused by a combination of fluctuating hormones, stress, and environmental factors. Unlike teenage acne, it's often deeper and more inflammatory. Treatments often include retinoids for cell turnover, benzoyl peroxide for bacterial control, and salicylic acid for pore cleansing. Consistency is vital, as most treatments take 8-12 weeks to show significant results.",
+    tags: ["Acne", "Treatment"],
   },
   {
     id: 4,
-    category: "Common Conditions",
-    title: "Managing Acne Vulgaris",
-    description:
-      "Understand the causes of acne and evidence-based treatments to clear your skin.",
-    content:
-      "Acne occurs when hair follicles become plugged with oil and dead skin cells. Factors like hormones, stress, and diet can exacerbate it.\n\nCommon treatments include:\n• Salicylic Acid: Helps unclog pores.\n• Benzoyl Peroxide: Kills acne-causing bacteria.\n• Retinoids: Speeds up cell turnover to prevent clogged pores.\n\nDo not pop pimples, as this increases inflammation and the risk of permanent scarring. A dermatologist can prescribe stronger topical or oral medications for persistent cases.",
-    icon: ShieldCheck,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-100",
-  },
-  {
-    id: 5,
-    category: "Common Conditions",
-    title: "Eczema (Atopic Dermatitis) Care",
-    description:
-      "Identify eczema triggers and learn how to restore your skin's natural barrier.",
-    content:
-      "Eczema makes your skin red, inflamed, and extremely itchy. It's related to a gene variation that affects the skin's ability to provide protection, leaving it affected by environmental factors, irritants, and allergens.\n\nManagement:\n• Bathe in warm (not hot) water for 10-15 minutes max.\n• Apply thick emollients/ceramide creams immediately after bathing to lock in moisture.\n• Use gentle, fragrance-free soaps and detergents.\n• During flare-ups, topical corticosteroids prescribed by a doctor can rapidly reduce inflammation.",
-    icon: BookOpen,
-    color: "text-blue-600",
-    bgColor: "bg-blue-100",
-  },
-  {
-    id: 6,
     category: "Procedures",
-    title: "What to Expect During a Skin Biopsy",
+    title: "Skin Biopsy: What to Expect",
     description:
-      "A step-by-step walkthrough of a standard dermatological biopsy procedure and post-care.",
+      "A guide to the process, pain management, and healing for skin biopsies.",
     content:
-      "If your doctor sees a suspicious lesion, they may perform a biopsy. This is a quick outpatient procedure.\n\n1. Numbing: A local anesthetic (like lidocaine) is injected around the site. This stings briefly.\n2. Removal: The doctor removes a small sample using a shave (scalpel slice parallel to skin), punch (circular tool), or excision (surgical removal).\n3. Hemostasis/Closure: Bleeding is stopped, sometimes requiring a suture.\n4. Aftercare: Keep the area clean, covered with Vaseline/Aquaphor, and bandaged. It usually heals within 1-2 weeks. The sample is sent to a dermatopathologist for microscope analysis.",
-    icon: Info,
-    color: "text-purple-600",
-    bgColor: "bg-purple-100",
+      "A skin biopsy is a procedure where a doctor removes a small sample of skin to test for conditions. It's usually performed under local anesthesia, so you'll feel a tiny pinch followed by numbness. Afterward, you'll need to keep the area clean and apply petroleum jelly. Results typically take 7-10 days.",
+    tags: ["Clinical", "Testing"],
   },
 ];
 
 export function EducationView() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [latestAnalysis, setLatestAnalysis] = useState<any>(null);
+  const [selectedArticle, setSelectedArticle] = useState<any>(null);
 
-  const filteredResources = useMemo(() => {
-    return resources.filter((r) => {
+  useEffect(() => {
+    async function fetchLatestScan() {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("uploads")
+        .select(
+          `
+          analysis:analysis_results(risk_level, summary)
+        `,
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single();
+
+      if (data?.analysis) {
+        setLatestAnalysis(
+          Array.isArray(data.analysis) ? data.analysis[0] : data.analysis,
+        );
+      }
+    }
+    fetchLatestScan();
+  }, []);
+
+  const filteredArticles = useMemo(() => {
+    return articles.filter((a) => {
       const matchesCategory =
-        activeCategory === "All" || r.category === activeCategory;
+        activeCategory === "All" || a.category === activeCategory;
       const matchesSearch =
-        r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.content.toLowerCase().includes(searchQuery.toLowerCase());
+        a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        a.description.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
   }, [activeCategory, searchQuery]);
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto pb-12">
-      {/* page header */}
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
-          Patient Education Center
-        </h1>
-        <p className="mt-2 text-lg text-slate-600 font-medium">
-          Curated clinical resources verified by board-certified dermatologists.
-          Empower yourself with accurate skin health knowledge.
-        </p>
-      </div>
-
-      {/* filter controls */}
-      <div className="space-y-4">
-        {/* search input */}
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search for conditions, treatments, or symptoms..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-slate-900 placeholder:text-slate-400 transition-shadow"
-          />
-        </div>
-
-        {/* category pills */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
-                activeCategory === cat
-                  ? "bg-primary-600 text-white shadow-md shadow-primary-600/20"
-                  : "bg-white text-slate-600 border border-slate-200 hover:border-primary-300 hover:text-primary-600"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* content items */}
-      <div className="grid gap-4">
-        <AnimatePresence mode="popLayout">
-          {filteredResources.map((resource) => {
-            const isExpanded = expandedId === resource.id;
-            const Icon = resource.icon;
-
-            return (
-              <motion.div
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                key={resource.id}
-              >
-                <Card
-                  className={`border-slate-200 overflow-hidden transition-all duration-300 ${
-                    isExpanded
-                      ? "ring-2 ring-primary-500 shadow-lg"
-                      : "hover:border-primary-300 hover:shadow-md cursor-pointer"
-                  }`}
-                  onClick={() => setExpandedId(isExpanded ? null : resource.id)}
-                >
-                  <CardContent className="p-0">
-                    <div className="p-6 flex items-start space-x-4">
-                      <div
-                        className={`p-3 rounded-xl flex-shrink-0 ${resource.bgColor} ${resource.color}`}
-                      >
-                        <Icon className="h-6 w-6" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                            {resource.category}
-                          </span>
-                        </div>
-                        <h3 className="text-xl font-bold text-slate-900 mb-1.5 leading-tight">
-                          {resource.title}
-                        </h3>
-                        <p
-                          className={`text-slate-600 text-sm leading-relaxed ${isExpanded ? "line-clamp-none" : "line-clamp-2"}`}
-                        >
-                          {resource.description}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 mt-2">
-                        <motion.div
-                          animate={{ rotate: isExpanded ? 180 : 0 }}
-                          transition={{ duration: 0.3 }}
-                        >
-                          <ChevronDown className="w-6 h-6 text-slate-400" />
-                        </motion.div>
-                      </div>
-                    </div>
-
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                          <div className="px-6 pb-6 pt-2 border-t border-slate-100 bg-slate-50">
-                            <h4 className="font-bold text-slate-900 mb-3 text-sm uppercase tracking-wider">
-                              Clinical Details
-                            </h4>
-                            <div className="prose prose-sm prose-slate max-w-none">
-                              {resource.content
-                                .split("\n")
-                                .map((paragraph, i) => (
-                                  <p
-                                    key={i}
-                                    className="mb-2 text-slate-700 leading-relaxed font-medium"
-                                  >
-                                    {paragraph}
-                                  </p>
-                                ))}
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
-
-        {filteredResources.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12 bg-white rounded-2xl border border-dashed border-slate-300"
+    <div className="max-w-6xl mx-auto space-y-12 pb-24 px-4">
+      {/* Hero Section */}
+      <section className="relative pt-8 pb-12">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-transparent -z-10 rounded-3xl" />
+        <div className="max-w-3xl">
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-tight"
           >
-            <Search className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
-              No results found
+            Digital <span className="text-primary-600">Dermatology</span> <br />
+            Learning Hub
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="mt-6 text-xl text-slate-600 font-medium leading-relaxed"
+          >
+            Empowering your skin health journey with AI-driven insights and
+            verified clinical resources.
+          </motion.p>
+        </div>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 space-y-10">
+          {latestAnalysis && (
+            <section className="space-y-6">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary-600" />
+                <h2 className="text-xl font-bold text-slate-900">
+                  Recommended for You
+                </h2>
+              </div>
+              <Card className="bg-gradient-to-br from-slate-900 to-slate-800 border-none text-white overflow-hidden group">
+                <CardContent className="p-8 relative">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <BookOpen className="w-24 h-24" />
+                  </div>
+                  <div className="relative z-10">
+                    <span className="text-xs font-bold uppercase tracking-widest text-primary-400 mb-2 block">
+                      Based on your latest scan
+                    </span>
+                    <h3 className="text-2xl font-bold mb-4">
+                      {latestAnalysis.risk_level === "CRITICAL" ||
+                      latestAnalysis.risk_level === "HIGH"
+                        ? "Urgent: Understanding High-Risk Lesions"
+                        : "Deep Dive: Preventive Skin Care Routine"}
+                    </h3>
+                    <p className="text-slate-300 text-sm leading-relaxed mb-6 max-w-md">
+                      Our system has analyzed your recent capture. We recommend
+                      reviewing these clinical modules to better understand your
+                      specific skin profile.
+                    </p>
+                    <button
+                      onClick={() =>
+                        setSelectedArticle(
+                          articles[
+                            latestAnalysis.risk_level === "CRITICAL" ||
+                            latestAnalysis.risk_level === "HIGH"
+                              ? 0
+                              : 1
+                          ],
+                        )
+                      }
+                      className="flex items-center gap-2 font-bold text-white hover:text-primary-400 transition-colors"
+                    >
+                      Start Personalized Module{" "}
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          <section>
+            <VisualSymptomGallery />
+          </section>
+
+          <section>
+            <ABCDEModule />
+          </section>
+        </div>
+
+        <div className="space-y-8">
+          <Card className="bg-primary-50 border-primary-100 border shadow-sm">
+            <CardContent className="p-6 text-center">
+              <div className="bg-primary-100 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Lightbulb className="w-6 h-6 text-primary-600" />
+              </div>
+              <h4 className="text-primary-900 font-bold mb-2">
+                Daily Skin Tip
+              </h4>
+              <p className="text-primary-700 text-xs leading-relaxed font-semibold italic">
+                "Apply sunscreen even when it's cloudy. Up to 80% of the sun's
+                harmful UV rays can penetrate through clouds."
+              </p>
+            </CardContent>
+          </Card>
+
+          <section className="bg-white rounded-3xl border border-slate-200 p-6 space-y-6">
+            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+              <Filter className="w-4 h-4" /> Filter Resources
             </h3>
-            <p className="text-slate-500 font-medium">
-              We couldn't find any articles matching "{searchQuery}".
+
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search articles..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-3 bg-slate-50 border-none rounded-2xl text-sm focus:ring-2 focus:ring-primary-500 outline-none transition-all"
+              />
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-2">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    activeCategory === cat
+                      ? "bg-primary-600 text-white shadow-lg shadow-primary-200"
+                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-4 space-y-4">
+              <AnimatePresence>
+                {filteredArticles.map((article) => (
+                  <motion.div
+                    key={article.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="group cursor-pointer p-3 -mx-3 rounded-2xl hover:bg-slate-50 transition-colors"
+                    onClick={() => setSelectedArticle(article)}
+                  >
+                    <h4 className="text-sm font-bold text-slate-900 group-hover:text-primary-600 transition-colors">
+                      {article.title}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
+                      {article.description}
+                    </p>
+                    <div className="flex gap-2 mt-2">
+                      {article.tags.map((t) => (
+                        <span
+                          key={t}
+                          className="text-[8px] uppercase font-black text-slate-400 tracking-tighter"
+                        >
+                          #{t}
+                        </span>
+                      ))}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </section>
+
+          <section className="bg-white rounded-3xl border border-slate-200 p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Calendar className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-lg font-bold text-slate-800">
+                Doctor Prescribed
+              </h3>
+            </div>
+            <p className="text-slate-500 text-xs leading-relaxed mb-4">
+              After your consultation, your doctor will add specific reading
+              materials here.
             </p>
-            <button
-              onClick={() => {
-                setSearchQuery("");
-                setActiveCategory("All");
-              }}
-              className="mt-6 text-primary-600 font-bold hover:text-primary-700"
-            >
-              Clear filters
-            </button>
-          </motion.div>
-        )}
+            <div className="bg-slate-50 rounded-2xl p-4 border border-dashed border-slate-300 text-center">
+              <span className="text-slate-400 text-xs font-bold italic">
+                No active prescriptions
+              </span>
+            </div>
+          </section>
+        </div>
       </div>
 
-      {/* bottom notification */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        className="mt-8 bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-8 shadow-xl text-center relative overflow-hidden"
-      >
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAzNHYtbDItMiAyaDZWMTJoLTZsLTIgMi0yLTJINHYxaDF2MmgtMXYxSDB2MmgyLjlsMiAySDF2Mmg0LjVsLTIgMkgwdjJoOGw2LTV2LTJsLTItMnYtMmwtMi0ydjJIMXYtMmgtMXYyaDBWMTRoMTB2MTJoNHYtaDR2LTEwaDR2MmgtdjJoLXYxMGg0djEySDM2ek02IDIyaDd2Mkg2em0xMC0ydjFoOHYtMWgtOHpNOCAxMmgtMWg0djJoLTR2MWg2di0yaC0xdjFIM3YtMWg1em04LTEwaDJ2MmgtMnptLTQgMmgtMnYyaDJWMDR6')] opacity-5" />
-        <Info className="h-8 w-8 text-primary-400 mx-auto mb-4 relative z-10" />
-        <h4 className="text-white font-bold mb-2 text-xl relative z-10">
-          Need specific information?
-        </h4>
-        <p className="text-slate-300 text-sm font-medium leading-relaxed max-w-lg mx-auto relative z-10">
-          During your secure consultation, your assigned board-certified doctor
-          will provide tailored clinical reading materials mapped exactly to
-          your diagnosis and treatment plan.
-        </p>
-      </motion.div>
+      {/* Article Detail Modal */}
+      <AnimatePresence>
+        {selectedArticle && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedArticle(null)}
+              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden pointer-events-auto"
+            >
+              <div className="absolute top-4 right-4 z-10">
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-slate-600" />
+                </button>
+              </div>
+
+              <div className="p-8 md:p-12">
+                <span className="text-xs font-bold uppercase tracking-widest text-primary-600 mb-4 block">
+                  {selectedArticle.category}
+                </span>
+                <h2 className="text-3xl font-black text-slate-900 mb-6 leading-tight">
+                  {selectedArticle.title}
+                </h2>
+                <div className="prose prose-slate max-w-none">
+                  <p className="text-slate-600 text-lg leading-relaxed font-medium">
+                    {selectedArticle.content}
+                  </p>
+                </div>
+
+                <div className="mt-12 flex flex-wrap gap-2">
+                  {selectedArticle.tags.map((t) => (
+                    <span
+                      key={t}
+                      className="text-xs font-bold px-3 py-1 bg-slate-100 text-slate-500 rounded-lg"
+                    >
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-10 pt-8 border-t border-slate-100 flex justify-end">
+                  <Button
+                    onClick={() => setSelectedArticle(null)}
+                    className="rounded-xl px-8"
+                  >
+                    Back to Resources
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

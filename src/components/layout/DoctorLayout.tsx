@@ -43,7 +43,8 @@ export function DoctorLayout() {
         .from("messages")
         .select("id", { count: "exact", head: true })
         .in("consultation_id", ids)
-        .neq("sender_role", "doctor");
+        .neq("sender_role", "doctor")
+        .eq("is_read", false);
 
       if (msgErr) return 0;
       return count ?? 0;

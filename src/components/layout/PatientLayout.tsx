@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import {
   Activity,
   FileText,
@@ -37,6 +38,35 @@ export function PatientLayout() {
     { name: "Education", path: "/patient/education", icon: FileText },
     { name: "Messages", path: "/patient/messages", icon: MessageSquare },
   ];
+
+  const { data: unreadCount = 0 } = useQuery({
+    queryKey: ["unread-messages", "patient"],
+    queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return 0;
+
+      const { data: consultations, error: consultErr } = await supabase
+        .from("consultations")
+        .select("id")
+        .eq("patient_id", user.id);
+
+      if (consultErr || !consultations?.length) return 0;
+      const ids = consultations.map((c) => c.id);
+
+      const { count, error: msgErr } = await supabase
+        .from("messages")
+        .select("id", { count: "exact", head: true })
+        .in("consultation_id", ids)
+        .neq("sender_role", "patient")
+        .eq("is_read", false);
+
+      if (msgErr) return 0;
+      return count ?? 0;
+    },
+    staleTime: 15_000,
+  });
 
   return (
     <div className="min-h-screen bg-surface-muted flex flex-col">
@@ -163,6 +193,11 @@ export function PatientLayout() {
                       <MessageSquare className="mr-3 h-5 w-5" />
                       Messages
                     </span>
+                    {unreadCount > 0 && (
+                      <span className="h-6 min-w-[1.5rem] rounded-full bg-primary-600 px-2 text-xs font-bold text-white flex items-center justify-center">
+                        {unreadCount}
+                      </span>
+                    )}
                   </Link>
                   <button
                     onClick={handleLogout}

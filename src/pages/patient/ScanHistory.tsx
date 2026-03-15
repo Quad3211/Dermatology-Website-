@@ -12,8 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/core/Button";
-import { Card, CardContent } from "../../components/core/Card";
 import { SecureTextChat } from "../../components/shared/SecureTextChat";
+import { VideoCallRoom } from "../../components/shared/VideoCallRoom";
 import { supabase } from "../../config/supabase";
 import { cn } from "../../utils/cn";
 
@@ -84,7 +84,7 @@ export function ScanHistory() {
         const analysis = Array.isArray(item.analysis)
           ? item.analysis[0]
           : item.analysis;
-        
+
         return {
           ...item,
           analysis,
@@ -134,27 +134,14 @@ export function ScanHistory() {
       ? `Dr. ${activeCallConsult.doctor.full_name.replace(/^Dr\.\s*/i, "")}`
       : "Your Doctor";
 
-    // prevent patient dialing
     return (
-      <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center text-white space-y-4">
-        <div className="w-24 h-24 rounded-full bg-slate-700 flex items-center justify-center text-4xl font-bold uppercase">
-          {doctorName.charAt(0)}
-        </div>
-        <p className="text-xl font-semibold">{doctorName}</p>
-        <p className="text-slate-400 text-sm">
-          Waiting for doctor to start the call…
-        </p>
-        <p className="text-xs text-slate-500 max-w-xs text-center">
-          Your doctor needs to initiate the video call from their portal. Please
-          keep this screen open.
-        </p>
-        <button
-          onClick={() => setCallConsultId(null)}
-          className="mt-6 px-6 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-sm font-semibold transition-colors"
-        >
-          Cancel
-        </button>
-      </div>
+      <VideoCallRoom
+        consultationId={activeCallConsult.id}
+        role="patient"
+        otherPartyName={doctorName}
+        onClose={() => setCallConsultId(null)}
+        autoStart={true}
+      />
     );
   }
 
@@ -228,9 +215,9 @@ export function ScanHistory() {
                     )
                   : null;
 
-              const canMessage = Boolean(consult);
+              const canMessage = consult !== null;
               const canCall =
-                Boolean(consult) &&
+                consult !== null &&
                 consult.status === "scheduled" &&
                 Boolean(consult.doctor);
 
@@ -385,7 +372,7 @@ export function ScanHistory() {
                         <>
                           {canCall && (
                             <Button
-                              className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap"
                               onClick={() => setCallConsultId(consult.id)}
                             >
                               <Video className="h-4 w-4 mr-2" />
@@ -394,7 +381,7 @@ export function ScanHistory() {
                           )}
                           {canMessage && (
                             <Button
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap"
                               onClick={() => setChatConsultId(consult.id)}
                             >
                               <MessageSquare className="h-4 w-4 mr-2" />
@@ -404,7 +391,7 @@ export function ScanHistory() {
                         </>
                       ) : (
                         <Link to="/patient/consultation">
-                          <Button className="w-full">
+                          <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap">
                             <Calendar className="h-4 w-4 mr-2" />
                             Book Consult
                           </Button>

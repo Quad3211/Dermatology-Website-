@@ -88,7 +88,7 @@ export function Dashboard() {
         const analysis = Array.isArray(item.analysis)
           ? item.analysis[0]
           : item.analysis;
-        
+
         return {
           ...item,
           analysis,
@@ -274,9 +274,9 @@ export function Dashboard() {
                     )
                   : null;
 
-              const canMessage = Boolean(consult);
+              const canMessage = consult !== null;
               const canCall =
-                Boolean(consult) &&
+                consult !== null &&
                 consult.status === "scheduled" &&
                 Boolean(consult.doctor);
 
@@ -421,7 +421,7 @@ export function Dashboard() {
                         <>
                           {canCall && (
                             <Button
-                              className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                              className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 shadow-lg shadow-violet-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap"
                               onClick={() => setCallConsultId(consult.id)}
                             >
                               <Video className="h-4 w-4 mr-2" />
@@ -430,7 +430,7 @@ export function Dashboard() {
                           )}
                           {canMessage && (
                             <Button
-                              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                              className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 shadow-lg shadow-blue-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap"
                               onClick={() => setChatConsultId(consult.id)}
                             >
                               <MessageSquare className="h-4 w-4 mr-2" />
@@ -440,7 +440,7 @@ export function Dashboard() {
                         </>
                       ) : (
                         <Link to="/patient/consultation">
-                          <Button className="w-full">
+                          <Button className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-200/50 rounded-xl hover:scale-[1.03] transition-all duration-300 font-bold border-none text-white whitespace-nowrap">
                             <Calendar className="h-4 w-4 mr-2" />
                             Book Consult
                           </Button>

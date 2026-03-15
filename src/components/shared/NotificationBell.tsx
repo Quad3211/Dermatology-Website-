@@ -10,7 +10,7 @@ interface NotifItem {
   fromName: string;
   content: string;
   timestamp: string;
-  read: boolean;
+  is_read: boolean;
 }
 
 interface Props {
@@ -72,7 +72,7 @@ export function NotificationBell({ role }: Props) {
 
         const { data: msgs } = await supabase
           .from("messages")
-          .select("id, content, created_at")
+          .select("id, content, created_at, is_read")
           .eq("consultation_id", c.id)
           .eq("sender_role", senderRole)
           .order("created_at", { ascending: false })
@@ -87,7 +87,7 @@ export function NotificationBell({ role }: Props) {
             fromName,
             content: msg.content,
             timestamp: msg.created_at,
-            read: false,
+            is_read: msg.is_read,
           });
         }
       }
@@ -109,7 +109,7 @@ export function NotificationBell({ role }: Props) {
       .on(
         "postgres_changes",
         {
-          event: "INSERT",
+          event: "*", // Listen to all changes (including updates for read status)
           schema: "public",
           table: "messages",
         },
@@ -125,15 +125,33 @@ export function NotificationBell({ role }: Props) {
     };
   }, [role]);
 
-  const unread = notifications.filter((n) => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const markAllRead = async () => {
+    const unreadIds = notifications.filter((n) => !n.is_read).map((n) => n.id);
+
+    if (unreadIds.length === 0) return;
+
+    const { error } = await supabase
+      .from("messages")
+      .update({ is_read: true })
+      .in("id", unreadIds);
+
+    if (!error) {
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    }
   };
 
-  const handleClick = (notif: NotifItem) => {
+  const handleClick = async (notif: NotifItem) => {
+    if (!notif.is_read) {
+      await supabase
+        .from("messages")
+        .update({ is_read: true })
+        .eq("id", notif.id);
+    }
+
     setNotifications((prev) =>
-      prev.map((n) => (n.id === notif.id ? { ...n, read: true } : n)),
+      prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n)),
     );
     setOpen(false);
     navigate(role === "doctor" ? "/doctor/messages" : "/patient/messages", {
@@ -161,9 +179,9 @@ export function NotificationBell({ role }: Props) {
         aria-label="Notifications"
       >
         <Bell className="h-4 w-4" />
-        {unread > 0 && (
+        {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 h-5 min-w-[1.25rem] rounded-full bg-primary-600 px-1 text-[10px] font-bold text-white flex items-center justify-center">
-            {unread > 9 ? "9+" : unread}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -177,14 +195,14 @@ export function NotificationBell({ role }: Props) {
               <span className="font-bold text-slate-900 text-sm">
                 Notifications
               </span>
-              {unread > 0 && (
+              {unreadCount > 0 && (
                 <span className="text-[10px] font-bold bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
-                  {unread} new
+                  {unreadCount} new
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
-              {unread > 0 && (
+              {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
                   className="text-[11px] text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1"
@@ -217,7 +235,7 @@ export function NotificationBell({ role }: Props) {
                   onClick={() => handleClick(notif)}
                   className={cn(
                     "w-full text-left px-5 py-4 flex gap-4 hover:bg-slate-50 transition-colors",
-                    !notif.read && "bg-primary-50/40",
+                    !notif.is_read && "bg-primary-50/40",
                   )}
                 >
                   {/* Avatar */}
@@ -239,7 +257,7 @@ export function NotificationBell({ role }: Props) {
                     </p>
                   </div>
                   {/* Unread dot */}
-                  {!notif.read && (
+                  {!notif.is_read && (
                     <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0 mt-1.5" />
                   )}
                 </button>

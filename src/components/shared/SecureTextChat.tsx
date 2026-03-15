@@ -109,6 +109,25 @@ export function SecureTextChat({
     staleTime: 10_000,
   });
 
+  // Mark messages as read when they are loaded and seen
+  useEffect(() => {
+    if (messages.length > 0) {
+      const markAsRead = async () => {
+        const unreadIds = messages
+          .filter((m) => m.sender_role !== role && !(m as any).is_read)
+          .map((m) => m.id);
+
+        if (unreadIds.length > 0) {
+          await supabase
+            .from("messages")
+            .update({ is_read: true })
+            .in("id", unreadIds);
+        }
+      };
+      markAsRead();
+    }
+  }, [messages, role, consultationId]);
+
   // realtime sub
   useEffect(() => {
     // Clean up any previous channel

@@ -90,6 +90,11 @@ export function ReviewPortal() {
   const { data: consultations = [], isLoading } = useQuery<Consultation[]>({
     queryKey: ["doctor-consultations"],
     queryFn: async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Not authenticated");
+
       const { data, error } = await supabase
         .from("consultations")
         .select(
@@ -104,7 +109,7 @@ export function ReviewPortal() {
           )
         `,
         )
-        .is("doctor_id", null)
+        .or(`doctor_id.is.null,doctor_id.eq.${user.id}`)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
