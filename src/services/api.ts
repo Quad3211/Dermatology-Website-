@@ -7,7 +7,11 @@ import { supabase } from "../config/supabase";
 // re-export symptoms
 export type { SymptomData };
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api/v1";
+const BASE_URL =
+  import.meta.env.VITE_API_BASE_URL &&
+  !import.meta.env.VITE_API_BASE_URL.includes("localhost")
+    ? import.meta.env.VITE_API_BASE_URL
+    : "/api/v1";
 
 // typescript types
 
