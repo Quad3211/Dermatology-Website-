@@ -342,10 +342,24 @@ export function useWebRTC({
         });
       }
     }
-    localVideoTrackRef.current?.stop();
-    localVideoTrackRef.current?.close();
-    localAudioTrackRef.current?.stop();
-    localAudioTrackRef.current?.close();
+    if (localVideoTrackRef.current) {
+      localVideoTrackRef.current.stop();
+      localVideoTrackRef.current.close();
+      // Also stop the underlying MediaStreamTrack if it exists
+      const mediaStreamTrack = localVideoTrackRef.current.getMediaStreamTrack();
+      if (mediaStreamTrack) {
+        mediaStreamTrack.stop();
+      }
+    }
+    if (localAudioTrackRef.current) {
+      localAudioTrackRef.current.stop();
+      localAudioTrackRef.current.close();
+      const mediaStreamTrack = localAudioTrackRef.current.getMediaStreamTrack();
+      if (mediaStreamTrack) {
+        mediaStreamTrack.stop();
+      }
+    }
+
     localVideoTrackRef.current = null;
     localAudioTrackRef.current = null;
     remoteVideoTrackRef.current = null;
