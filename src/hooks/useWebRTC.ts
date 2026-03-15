@@ -337,7 +337,13 @@ export function useWebRTC({
             return;
           }
           const currentState = callStateRef.current;
-          if (currentState === "ended" || currentState === "error" || currentState === "idle") {
+          if (
+            currentState === "ended" ||
+            currentState === "error" ||
+            currentState === "idle" ||
+            currentState === "connected" ||
+            currentState === "incoming"
+          ) {
             return;
           }
 
