@@ -1,4 +1,4 @@
-import { Award, Globe, Heart, Lock, ShieldPlus, UserCheck } from "lucide-react";
+import { Award, Globe, Heart, Lock, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PublicNavbar } from "../../components/shared/PublicNavbar";
 
@@ -10,8 +10,8 @@ export function AboutPage() {
         {/* hero section */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="flex justify-center mb-6">
-            <div className="bg-primary-100 p-4 rounded-2xl shadow-sm border border-primary-200">
-              <ShieldPlus className="w-12 h-12 text-primary-600" />
+            <div className="p-4 rounded-2xl shadow-sm border border-slate-100 bg-white">
+              <img src="/dermify-logo.png" className="w-16 h-16 object-contain" alt="Dermify Logo" />
             </div>
           </div>
           <h1 className="text-4xl lg:text-5xl font-extrabold text-slate-900 mb-6 tracking-tight">

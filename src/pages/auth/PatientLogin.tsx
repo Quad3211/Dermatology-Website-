@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Activity, Lock, Scan, ShieldPlus } from "lucide-react";
+import { Activity, Lock, Scan } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../../components/core/Button";
@@ -66,8 +66,8 @@ export function PatientLogin() {
           transition={{ duration: 0.5 }}
           className="relative z-10 flex flex-col h-full justify-center"
         >
-          <div className="bg-primary-50 text-primary-600 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-sm">
-            <ShieldPlus className="w-8 h-8" />
+          <div className="bg-primary-50 p-2 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-sm">
+            <img src="/dermify-logo.png" className="w-12 h-12 object-contain" alt="Dermify Logo" />
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 leading-[1.1] mb-4">
             Your Skin Health. <br />
