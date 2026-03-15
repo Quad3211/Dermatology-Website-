@@ -69,8 +69,13 @@ export function Dashboard() {
         .select(
           `
           id, created_at, status, body_part,
-          analysis:analysis_results(risk_level, summary, confidence, severity_score),
-          consultations(id, status, scheduled_at, doctor_notes, doctor:profiles!consultations_doctor_id_fkey(full_name))
+          analysis:analysis_results(
+            risk_level,
+            summary,
+            confidence,
+            severity_score,
+            consultations(id, status, scheduled_at, doctor_notes, doctor:profiles!consultations_doctor_id_fkey(full_name))
+          )
         `,
         )
         .eq("user_id", user.id)
@@ -79,12 +84,17 @@ export function Dashboard() {
 
       if (error) throw error;
 
-      return (data as any[]).map((item) => ({
-        ...item,
-        analysis: Array.isArray(item.analysis)
+      return (data as any[]).map((item) => {
+        const analysis = Array.isArray(item.analysis)
           ? item.analysis[0]
-          : item.analysis,
-      })) as DashboardUpload[];
+          : item.analysis;
+        
+        return {
+          ...item,
+          analysis,
+          consultations: analysis?.consultations || [],
+        };
+      }) as DashboardUpload[];
     },
   });
 
