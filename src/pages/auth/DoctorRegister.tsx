@@ -45,12 +45,7 @@ export function DoctorRegister() {
     if (password !== confirmPassword) {
       return setError("Passwords do not match");
     }
-    if (
-      !fullName ||
-      !licenseNumber ||
-      !officeAddress ||
-      !parish
-    ) {
+    if (!fullName || !licenseNumber || !officeAddress || !parish) {
       return setError("Please fill in all professional details and address");
     }
 
@@ -102,7 +97,7 @@ export function DoctorRegister() {
           className="relative z-10 flex flex-col h-full justify-center"
         >
           <div className="bg-emerald-50 text-emerald-600 w-16 h-16 rounded-2xl flex items-center justify-center mb-8 shadow-sm">
-            <Activity className="w-8 h-8" />
+            <ShieldPlus className="w-8 h-8" />
           </div>
           <h1 className="text-3xl lg:text-4xl font-extrabold text-slate-900 leading-[1.1] mb-4">
             The AI Co-Pilot for <br />
@@ -154,76 +149,84 @@ export function DoctorRegister() {
           </div>
 
           <form onSubmit={handleRegister} className="space-y-4">
-            <Input
-              label="Full Name"
-              type="text"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              placeholder="Dr. Jane Doe"
-              required
-            />
-            <Input
-              label="Email Address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="doctor@example.com"
-              required
-            />
-            <Input
-              label="Medical License #"
-              type="text"
-              value={licenseNumber}
-              onChange={(e) => setLicenseNumber(e.target.value)}
-              placeholder="MD-123456"
-              required
-            />
-
-            <Input
-              label="Office Address"
-              type="text"
-              value={officeAddress}
-              onChange={(e) => setOfficeAddress(e.target.value)}
-              placeholder="123 Health Ave, Suite 4"
-              required
-            />
-
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-slate-700 mb-1">
-                Parish
-              </label>
-              <select
-                value={parish}
-                onChange={(e) => setParish(e.target.value)}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-3">
+              <Input
+                label="Full Name"
+                type="text"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                placeholder="Dr. Jane Doe"
                 required
-                className="w-full h-11 px-4 text-base bg-slate-50 border border-slate-200 rounded-xl transition-all outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 hover:border-slate-300 text-slate-900"
-              >
-                <option value="" disabled>
-                  Select Parish
-                </option>
-                {JAMAICA_PARISHES.map((p) => (
-                  <option key={p} value={p}>
-                    {p}
+                className="h-11"
+              />
+              <Input
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="doctor@example.com"
+                required
+                className="h-11"
+              />
+              <Input
+                label="Medical License #"
+                type="text"
+                value={licenseNumber}
+                onChange={(e) => setLicenseNumber(e.target.value)}
+                placeholder="MD-123456"
+                required
+                className="h-11"
+              />
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-700">
+                  Parish
+                </label>
+                <select
+                  value={parish}
+                  onChange={(e) => setParish(e.target.value)}
+                  required
+                  className="w-full h-11 px-4 text-base bg-white border border-slate-200 rounded-xl transition-all outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 hover:border-slate-300 text-slate-900 shadow-sm"
+                >
+                  <option value="" disabled>
+                    Select Parish
                   </option>
-                ))}
-              </select>
+                  {JAMAICA_PARISHES.map((p) => (
+                    <option key={p} value={p}>
+                      {p}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <Input
+                  label="Office Address"
+                  type="text"
+                  value={officeAddress}
+                  onChange={(e) => setOfficeAddress(e.target.value)}
+                  placeholder="123 Health Ave, Suite 4"
+                  required
+                  className="h-11"
+                />
+              </div>
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="h-11"
+              />
+              <Input
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="h-11"
+              />
             </div>
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
-            <Input
-              label="Confirm Password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
 
             {error && (
               <motion.div
