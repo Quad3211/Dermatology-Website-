@@ -12,21 +12,34 @@ export function ProtectedRoute({
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
+    let mounted = true;
+
     // Check active session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setIsAuthenticated(!!session);
-      setUserRole(session?.user?.user_metadata?.role || "patient");
+      if (session?.user) {
+        setUserRole(session.user.user_metadata?.role || "patient");
+      }
     });
 
     // Subscribe to auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!mounted) return;
       setIsAuthenticated(!!session);
-      setUserRole(session?.user?.user_metadata?.role || "patient");
+      if (session?.user) {
+        setUserRole(session.user.user_metadata?.role || "patient");
+      } else {
+        setUserRole(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Show loading spinner while checking session initially
