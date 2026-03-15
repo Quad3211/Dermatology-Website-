@@ -74,6 +74,7 @@ export function useWebRTC({
 
   // Supabase signaling channel (ring / hang-up only)
   const channelRef = useRef<RealtimeChannel | null>(null);
+  const isSubscribedRef = useRef(false);
 
   // Shared refs for video containers (VideoCallRoom attaches DOM div refs here)
   const localVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -148,11 +149,16 @@ export function useWebRTC({
         onCallEnded?.();
         cleanup(false);
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          isSubscribedRef.current = true;
+        }
+      });
 
     channelRef.current = channel;
 
     return () => {
+      isSubscribedRef.current = false;
       channel.unsubscribe();
       channelRef.current = null;
     };
@@ -161,36 +167,62 @@ export function useWebRTC({
 
   // ── Acquire camera + mic ──────────────────────────────────
   const getLocalTracks = useCallback(async () => {
-    if (!localVideoTrackRef.current || !localAudioTrackRef.current) {
-      const [audioTrack, videoTrack] =
-        await AgoraRTC.createMicrophoneAndCameraTracks(
-          {},
-          { encoderConfig: "720p_1" },
-        );
-      localAudioTrackRef.current = audioTrack;
-      localVideoTrackRef.current = videoTrack;
+    let audioTrack = localAudioTrackRef.current;
+    let videoTrack = localVideoTrackRef.current;
 
-      // Play local preview into container if ready
-      if (localContainerRef.current) {
-        videoTrack.play(localContainerRef.current);
+    if (!audioTrack) {
+      try {
+        audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        localAudioTrackRef.current = audioTrack;
+      } catch (err) {
+        console.warn("Could not acquire microphone track:", err);
       }
     }
-    return {
-      audioTrack: localAudioTrackRef.current!,
-      videoTrack: localVideoTrackRef.current!,
-    };
+
+    if (!videoTrack) {
+      try {
+        videoTrack = await AgoraRTC.createCameraVideoTrack({ encoderConfig: "720p_1" });
+        localVideoTrackRef.current = videoTrack;
+
+        // Play local preview into container if ready
+        if (localContainerRef.current) {
+          videoTrack.play(localContainerRef.current);
+        }
+      } catch (err) {
+        console.warn("Could not acquire camera track:", err);
+      }
+    }
+
+    if (!audioTrack && !videoTrack) {
+      throw new Error("Could not access camera or microphone. Please allow permissions or connect a device.");
+    }
+
+    return { audioTrack, videoTrack };
   }, []);
 
   // ── Join Agora channel and publish ────────────────────────
-  const joinAndPublish = useCallback(async () => {
-    const client = getClient();
-    if (client.connectionState !== "DISCONNECTED") return;
+  const joinAndPublish = useCallback(
+    async () => {
+      const client = getClient();
+      if (client.connectionState !== "DISCONNECTED") return;
 
-    await client.join(APP_ID, agoraChannel, null, null);
-    const { audioTrack, videoTrack } = await getLocalTracks();
-    await client.publish([audioTrack, videoTrack]);
-    syncCallState("connected");
-  }, [getClient, getLocalTracks, agoraChannel]);
+      // Note: Passing null as token works if the project is in App ID testing mode (no certificate).
+      await client.join(APP_ID, agoraChannel, null, null);
+      
+      const { audioTrack, videoTrack } = await getLocalTracks();
+      
+      const tracks = [];
+      if (audioTrack) tracks.push(audioTrack);
+      if (videoTrack) tracks.push(videoTrack);
+      
+      if (tracks.length > 0) {
+        await client.publish(tracks);
+      }
+      
+      syncCallState("connected");
+    },
+    [getClient, getLocalTracks, agoraChannel],
+  );
 
   // ── Start call (caller) ───────────────────────────────────
   const startCall = useCallback(
@@ -199,12 +231,21 @@ export function useWebRTC({
         setError(null);
         syncCallState("calling");
 
-        // Notify the other party
-        channelRef.current?.send({
-          type: "broadcast",
-          event: "call-request",
-          payload: { callerName: myName },
-        });
+        // Notify the other party securely after channel is subscribed
+        let attempts = 0;
+        const trySendCall = () => {
+          if (isSubscribedRef.current && channelRef.current) {
+            channelRef.current.send({
+              type: "broadcast",
+              event: "call-request",
+              payload: { callerName: myName },
+            });
+          } else if (attempts < 50) {
+            attempts++;
+            setTimeout(trySendCall, 100);
+          }
+        };
+        trySendCall();
 
         syncCallState("connecting");
         await joinAndPublish();
@@ -234,11 +275,14 @@ export function useWebRTC({
   // ── Cleanup ───────────────────────────────────────────────
   const cleanup = useCallback((sendSignal = true) => {
     if (sendSignal && channelRef.current) {
-      channelRef.current.send({
-        type: "broadcast",
-        event: "call-ended",
-        payload: {},
-      });
+      // Best effort send if subscribed, else assume it's unneeded
+      if (isSubscribedRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "call-ended",
+          payload: {},
+        });
+      }
     }
     localVideoTrackRef.current?.stop();
     localVideoTrackRef.current?.close();

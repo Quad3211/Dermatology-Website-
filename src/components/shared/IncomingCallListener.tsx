@@ -153,14 +153,14 @@ export function IncomingCallListener({
     const columnFilter = role === "patient" ? "patient_id" : "doctor_id";
     const selectQuery =
       role === "patient"
-        ? `id, profiles:consultations_doctor_id_fkey(full_name)`
-        : `id, profiles:consultations_patient_id_fkey(full_name)`;
+        ? `id, profiles!consultations_doctor_id_fkey(full_name)`
+        : `id, profiles!consultations_patient_id_fkey(full_name)`;
 
     const { data } = await supabase
       .from("consultations")
       .select(selectQuery)
       .eq(columnFilter, user.id)
-      .in("status", ["pending", "scheduled", "reviewed"]);
+      .in("status", ["pending", "scheduled", "reviewed", "closed"]);
 
     if (!data) return;
 
