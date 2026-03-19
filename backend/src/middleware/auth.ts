@@ -34,10 +34,11 @@ export async function verifyJWT(
   } = await verifyClient.auth.getUser(token);
 
   if (error || !user) {
+    console.error("[Auth] JWT Verification Failed:", error);
     res.status(401).json({
       error: {
         code: "UNAUTHORIZED",
-        message: "JWT token is invalid or expired.",
+        message: error?.message ?? "JWT token is invalid or expired.",
         timestamp: new Date().toISOString(),
       },
     });

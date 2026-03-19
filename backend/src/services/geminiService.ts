@@ -89,9 +89,17 @@ const analysisSchema: any = {
 
 // Use the current GA stable model
 const model = genAI.getGenerativeModel(
-  { model: "gemini-2.0-flash" },
+  {
+    model: "gemini-2.5-flash",
+  },
   { apiVersion: "v1beta" },
 );
+
+// Configure model with generation settings
+model.generationConfig = {
+  responseMimeType: "application/json",
+  responseSchema: analysisSchema,
+};
 
 export async function analyzeSkinWithGemini(
   base64Image: string,
@@ -138,16 +146,22 @@ export async function analyzeSkinWithGemini(
         "AI returned a malformed response. Please try again.",
       );
     }
-  } catch (error: unknown) {
-    const err = error as { status?: number; message?: string };
-    console.error("[Gemini Service] Error during API call:", error);
+  } catch (error: any) {
+    if (error instanceof HttpError) throw error;
+
+    console.error(
+      `[Gemini Service] API Error (Status: ${error.status}):`,
+      error.message,
+    );
 
     // format rate limit errs
-    if (
-      err.status === 429 ||
-      err.message?.includes("429") ||
-      err.message?.includes("Quota exceeded")
-    ) {
+    const isRateLimit =
+      error.status === 429 ||
+      error.statusCode === 429 ||
+      error.message?.toLowerCase().includes("quota exceeded") ||
+      error.message?.toLowerCase().includes("resource_exhausted");
+
+    if (isRateLimit) {
       throw new HttpError(
         429,
         "RATE_LIMIT_EXCEEDED",
@@ -156,11 +170,10 @@ export async function analyzeSkinWithGemini(
     }
 
     // handle standard errs
-    const detailedMessage = err.message ? `: ${err.message}` : "";
     throw new HttpError(
       500,
       "AI_SERVICE_ERROR",
-      `Failed to analyze image with Google AI${detailedMessage}`,
+      `Failed to analyze image with Google AI: ${error.message || "Unknown error"}.`,
     );
   }
 }

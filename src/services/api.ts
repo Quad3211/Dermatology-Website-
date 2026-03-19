@@ -107,6 +107,10 @@ export interface ConsultationPayload {
 
 async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const {
     data: { session },
   } = await supabase.auth.getSession();
 
