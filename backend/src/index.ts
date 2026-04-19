@@ -1,3 +1,11 @@
+import { config } from "dotenv";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
+
+// Load .env.local from the project root (two levels up from backend/src/)
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
+config({ path: resolve(__dirname, "../../.env.local") });
+
 import cors from "cors";
 import express from "express";
 import rateLimit from "express-rate-limit";
